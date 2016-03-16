@@ -9,5 +9,6 @@ For the q-brain
 - python 3.3+
 - tensorflow 0.7.1
 
-For the demo App 
+For the demo App (server part)
 - falcon
+- gunicorn
