@@ -4,17 +4,17 @@ import os
 from QBrain import QBrain
 
 num_input_wall_distance = 2 + 1 * 4
-num_input_enemy_distance = 16
+num_input_enemy_distance = 64
 num_input_enemy_distance_absolute = 0
 num_input_hit_by_bullet_damage = 4
 num_inputs = num_input_wall_distance + num_input_enemy_distance + num_input_enemy_distance_absolute + num_input_hit_by_bullet_damage
 num_actions = 6
-temporal_window = 30  # amount of temporal memory. 0 = agent lives in-the-moment :)
+temporal_window = 60
 single_input_size = num_inputs + num_actions
-single_input_features = int(single_input_size * 3 / 4.0)
-num_neurons_in_fully_connected_layers = [512, 256, 128, 64, 256]
+num_neurons_in_convolution_layers = [64, 48, 32]
+num_neurons_in_fully_connected_layers = [512, 256, 128, 64]
 
-brain = QBrain(single_input_size, temporal_window, num_actions, single_input_features,
+brain = QBrain(single_input_size, temporal_window, num_actions, num_neurons_in_convolution_layers,
                num_neurons_in_fully_connected_layers)
 
 if os.path.exists('saves/'):

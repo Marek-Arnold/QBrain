@@ -11,7 +11,7 @@ class QBrain:
                  single_input_size,
                  temporal_window_size,
                  num_actions,
-                 single_input_features,
+                 num_neurons_in_convolution_layers,
                  num_neurons_in_fully_connected_layers):
         """
         Parameters
@@ -22,8 +22,8 @@ class QBrain:
             Number of observations to use for each prediction.
         :param num_actions: int
             The number of possible actions that can be taken.
-        :param single_input_features: int
-            The number of features that should be learned to represent a single input.
+        :param num_neurons_in_convolution_layers: list of int
+            Number of features in the convolution layers that should be learned for the representation of a single input.
         :param num_neurons_in_fully_connected_layers: list of int
             Number of neurons in the fully connected layers.
 
@@ -37,7 +37,7 @@ class QBrain:
         self.net = QBrainNet(single_input_size,
                              temporal_window_size,
                              num_actions,
-                             single_input_features,
+                             num_neurons_in_convolution_layers,
                              num_neurons_in_fully_connected_layers)
 
         self.mem = QBrainMemory(single_input_size, num_actions)

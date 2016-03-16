@@ -9,7 +9,7 @@ class QBrainNet:
                  single_input_size,
                  temporal_window_size,
                  num_actions,
-                 single_input_features,
+                 num_neurons_in_convolution_layers,
                  num_neurons_in_fully_connected_layers):
         """
         Parameters
@@ -20,8 +20,8 @@ class QBrainNet:
             Number of observations seen at once.
         :param num_actions: int
             Number of actions that can be taken.
-        :param single_input_features: int
-            Number of features that should be learned for the representation of a single input.
+        :param num_neurons_in_convolution_layers: list of int
+            Number of features in the convolution layers that should be learned for the representation of a single input.
         :param num_neurons_in_fully_connected_layers: list of int
             Number of neurons in the fully connected layers.
 
@@ -45,27 +45,34 @@ class QBrainNet:
             initial = tf.constant(0.1, shape=shape)
             return tf.Variable(initial, name="bias_" + name)
 
-        W_conv = [None] * 1
-        b_conv = [None] * 1
-        h_conv = [None] * 1
+        input_conv = [None] * len(num_neurons_in_convolution_layers)
+        W_conv = [None] * len(num_neurons_in_convolution_layers)
+        b_conv = [None] * len(num_neurons_in_convolution_layers)
+        h_conv = [None] * len(num_neurons_in_convolution_layers)
+        h_conv_reshaped = [None] * len(num_neurons_in_convolution_layers)
 
-        reshaped_x = tf.reshape(self.x, [-1, 1, temporal_window_size, single_input_size])
+        for conv_layer_num in range(len(num_neurons_in_convolution_layers)):
+            input_size = single_input_size
+            if conv_layer_num == 0:
+                input_conv[conv_layer_num] = tf.reshape(self.x, [-1, 1, temporal_window_size, single_input_size])
+            else:
+                input_size = num_neurons_in_convolution_layers[conv_layer_num - 1]
+                input_conv[conv_layer_num] = tf.reshape(h_conv_reshaped[conv_layer_num - 1], [-1, 1, temporal_window_size, input_size])
 
-        W_conv[0] = weight_variable([1, 1, single_input_size, single_input_features], "convolution_0")
-        b_conv[0] = bias_variable([single_input_features], "convolution_0")
-        h_conv[0] = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(reshaped_x, W_conv[0], strides=[1, 1, 1, 1], padding='SAME'), b_conv[0]))
+            W_conv[conv_layer_num] = weight_variable([1, 1, input_size, num_neurons_in_convolution_layers[conv_layer_num]], "convolution_" + str(conv_layer_num))
+            b_conv[conv_layer_num] = bias_variable([num_neurons_in_convolution_layers[conv_layer_num]], "convolution_" + str(conv_layer_num))
+            h_conv[conv_layer_num] = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(input_conv[conv_layer_num], W_conv[conv_layer_num], strides=[1, 1, 1, 1], padding='SAME'), b_conv[conv_layer_num]))
 
-        print(tf.shape(h_conv[0]))
-        h_conv_reshaped = tf.reshape(h_conv[0], [-1, temporal_window_size * single_input_features])
-        print(tf.shape(h_conv_reshaped))
+            h_conv_reshaped[conv_layer_num] = tf.reshape(h_conv[conv_layer_num], [-1, temporal_window_size * num_neurons_in_convolution_layers[conv_layer_num]])
+
 
         W_fc = [None] * len(num_neurons_in_fully_connected_layers)
         b_fc = [None] * len(num_neurons_in_fully_connected_layers)
         h_fc = [None] * len(num_neurons_in_fully_connected_layers)
 
-        W_fc[0] = weight_variable([single_input_features * temporal_window_size, num_neurons_in_fully_connected_layers[0]], "fc_0")
+        W_fc[0] = weight_variable([num_neurons_in_convolution_layers[-1] * temporal_window_size, num_neurons_in_fully_connected_layers[0]], "fc_0")
         b_fc[0] = bias_variable([num_neurons_in_fully_connected_layers[0]], "fc_0")
-        h_fc[0] = tf.nn.relu(tf.nn.bias_add(tf.matmul(h_conv_reshaped, W_fc[0]), b_fc[0]))
+        h_fc[0] = tf.nn.relu(tf.nn.bias_add(tf.matmul(h_conv_reshaped[-1], W_fc[0]), b_fc[0]))
 
         for layerNum in range(1, len(num_neurons_in_fully_connected_layers)):
             W_fc[layerNum] = weight_variable([num_neurons_in_fully_connected_layers[layerNum - 1], num_neurons_in_fully_connected_layers[layerNum]], "fc_" + str(layerNum))
