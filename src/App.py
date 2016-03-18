@@ -4,15 +4,15 @@ import os
 from QBrain import QBrain
 
 num_input_wall_distance = 2 + 1 * 4
-num_input_enemy_distance = 64
-num_input_enemy_distance_absolute = 0
-num_input_hit_by_bullet_damage = 4
-num_inputs = num_input_wall_distance + num_input_enemy_distance + num_input_enemy_distance_absolute + num_input_hit_by_bullet_damage
+num_sensor_enemy = 16
+num_input_enemy = num_sensor_enemy * 4
+num_input_hit_by_bullet_damage = 3
+num_inputs = num_input_wall_distance + num_input_enemy + num_input_hit_by_bullet_damage
 num_actions = 6
-temporal_window = 60
+temporal_window = 60 
 single_input_size = num_inputs + num_actions
-num_neurons_in_convolution_layers = [64, 48, 32]
-num_neurons_in_fully_connected_layers = [512, 256, 128, 64]
+num_neurons_in_convolution_layers = [128, 64, 32]
+num_neurons_in_fully_connected_layers = [1024, 512, 256]
 
 brain = QBrain(single_input_size, temporal_window, num_actions, num_neurons_in_convolution_layers,
                num_neurons_in_fully_connected_layers)
@@ -36,21 +36,22 @@ class ForwardResource:
                 d = 0
             array_with_num_inputs_numbers.append(d)
 
-        for i in range(0, num_input_enemy_distance):
+        for i in range(0, num_sensor_enemy):
             ind = 'de_' + str(i)
             if ind in body:
                 d = float(body[ind])
+		e = float(body['ee_' + str(i)])
+		h = float(body['he_' + str(i)])
+		v = float(body['ve_' + str(i)])
             else:
                 d = 0
+		e = 0
+		h = 0
+		v = 0
             array_with_num_inputs_numbers.append(d)
-
-        for i in range(0, num_input_enemy_distance_absolute):
-            ind = 'dea_' + str(i)
-            if ind in body:
-                d = float(body[ind])
-            else:
-                d = 0
-            array_with_num_inputs_numbers.append(d)
+            array_with_num_inputs_numbers.append(e)
+            array_with_num_inputs_numbers.append(h)
+            array_with_num_inputs_numbers.append(v)
 
         for i in range(0, num_input_hit_by_bullet_damage):
             ind = 'da_' + str(i)
@@ -59,6 +60,8 @@ class ForwardResource:
             else:
                 d = 0
             array_with_num_inputs_numbers.append(d)
+
+	print(str(len(array_with_num_inputs_numbers)) + ' of ' + str(num_inputs))
 
         group_name = 'default'
         if 'gn' in body:
@@ -86,21 +89,23 @@ class ExpertForwardResource:
                 d = 0
             array_with_num_inputs_numbers.append(d)
 
-        for i in range(0, num_input_enemy_distance):
+        for i in range(0, num_sensor_enemy):
             ind = 'de_' + str(i)
             if ind in body:
                 d = float(body[ind])
+		e = float(body['ee_' + str(i)])
+		h = float(body['he_' + str(i)])
+		v = float(body['ve_' + str(i)])
             else:
                 d = 0
+		e = 0
+		h = 0
+		v = 0
             array_with_num_inputs_numbers.append(d)
+            array_with_num_inputs_numbers.append(e)
+            array_with_num_inputs_numbers.append(h)
+            array_with_num_inputs_numbers.append(v)
 
-        for i in range(0, num_input_enemy_distance_absolute):
-            ind = 'dea_' + str(i)
-            if ind in body:
-                d = float(body[ind])
-            else:
-                d = 0
-            array_with_num_inputs_numbers.append(d)
 
         for i in range(0, num_input_hit_by_bullet_damage):
             ind = 'da_' + str(i)
@@ -109,6 +114,8 @@ class ExpertForwardResource:
             else:
                 d = 0
             array_with_num_inputs_numbers.append(d)
+
+	print(str(len(array_with_num_inputs_numbers)) + ' of ' + str(num_inputs))
 
         group_name = 'default'
         if 'gn' in body:
