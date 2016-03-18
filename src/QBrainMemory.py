@@ -2,6 +2,8 @@ from Experience import Experience
 from ExperienceGroup import ExperienceGroup
 from Reward import Reward
 import random
+import os
+import os.path
 import pickle
 
 
@@ -162,29 +164,64 @@ class QBrainMemory:
 
         return self.get_batch_from_groups(batch_size, temporal_window, self.flushed_experience_groups, self.num_actions, self.num_inputs)
 
-    def save(self, name):
+    def save(self, path, base_name, extension):
         """
         Save all flushed groups to disk.
 
         Parameters
         ----------
-        :param name: str
-            The name and path of the file where the flushed groups should be stored.
+        :param path: str
+            The path for the files where the flushed groups are stored.
+        :param base_name: str
+            The first part of the name for the flushed groups.
+        :param extension: str
+            The extension to use for the files.
 
         Returns
         -------
         :return: None
         """
-        self.save_obj(self.flushed_experience_groups, name)
 
-    def load(self, name):
+        for group_name in self.flushed_experience_groups:
+            full_path = path + base_name + '_' + group_name + extension
+            if os.path.isfile(full_path):
+                print('Not overwriting ' + full_path + ' as it already exists.')
+            else:
+                self.save_obj(self.flushed_experience_groups[group_name], full_path)
+
+    def load(self, path, base_name, extension):
+        """
+        Restore some previously saved flushed groups.
+
+        Parameters
+        ----------
+        :param path: str
+            The path for the files where the flushed groups are stored.
+        :param base_name: str
+            The first part of the name for the flushed groups.
+        :param extension: str
+            The extension to use for the files.
+
+        Returns
+        -------
+        :return: None
+        """
+        self.flushed_experience_groups = {}
+        if not os.path.exists(path):
+            print('Path not found! ' + path)
+        else:
+            for file_name in os.listdir(path):
+                if file_name[:len(base_name)] is base_name and file_name[-len(extension):] is extension:
+                    self.flushed_experience_groups[file_name[len(base_name):-len(extension)]] = self.load_obj(file_name)
+
+    def load_single_file(self, name):
         """
         Restore some previously saved flushed groups.
 
         Parameters
         ----------
         :param name: str
-            The name and path of the file where the flushed groups are stored.
+            The name and path of the flushed experience groups.
 
         Returns
         -------
