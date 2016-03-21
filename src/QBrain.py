@@ -12,6 +12,7 @@ class QBrain:
                  temporal_window_size,
                  num_actions,
                  num_neurons_in_convolution_layers,
+                 num_neurons_in_convolution_layers_for_time,
                  num_neurons_in_fully_connected_layers):
         """
         Parameters
@@ -24,6 +25,8 @@ class QBrain:
             The number of possible actions that can be taken.
         :param num_neurons_in_convolution_layers: list of int
             Number of features in the convolution layers that should be learned for the representation of a single input.
+        :param num_neurons_in_convolution_layers_for_time: list of int
+            Number of features in the convolution layers that should be learned for the representation of two single inputs.
         :param num_neurons_in_fully_connected_layers: list of int
             Number of neurons in the fully connected layers.
 
@@ -38,6 +41,7 @@ class QBrain:
                              temporal_window_size,
                              num_actions,
                              num_neurons_in_convolution_layers,
+                             num_neurons_in_convolution_layers_for_time,
                              num_neurons_in_fully_connected_layers)
 
         self.mem = QBrainMemory(single_input_size, num_actions)

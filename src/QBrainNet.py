@@ -10,6 +10,7 @@ class QBrainNet:
                  temporal_window_size,
                  num_actions,
                  num_neurons_in_convolution_layers,
+                 num_neurons_in_convolution_layers_for_time,
                  num_neurons_in_fully_connected_layers):
         """
         Parameters
@@ -22,6 +23,8 @@ class QBrainNet:
             Number of actions that can be taken.
         :param num_neurons_in_convolution_layers: list of int
             Number of features in the convolution layers that should be learned for the representation of a single input.
+        :param num_neurons_in_convolution_layers_for_time: list of int
+            Number of features in the convolution layers that should be learned for the representation of two single inputs.
         :param num_neurons_in_fully_connected_layers: list of int
             Number of neurons in the fully connected layers.
 
@@ -65,14 +68,35 @@ class QBrainNet:
 
             h_conv_reshaped[conv_layer_num] = tf.reshape(h_conv[conv_layer_num], [-1, temporal_window_size * num_neurons_in_convolution_layers[conv_layer_num]])
 
+        input_conv_time = [None] * len(num_neurons_in_convolution_layers_for_time)
+        W_conv_time = [None] * len(num_neurons_in_convolution_layers_for_time)
+        b_conv_time = [None] * len(num_neurons_in_convolution_layers_for_time)
+        h_conv_time = [None] * len(num_neurons_in_convolution_layers_for_time)
+        h_conv_time_reshaped = [None] * len(num_neurons_in_convolution_layers_for_time)
+
+        conv_temp_window_size = temporal_window_size
+        for conv_layer_num in range(len(num_neurons_in_convolution_layers_for_time)):
+            conv_temp_window_size /= 2
+            input_size = num_neurons_in_convolution_layers[-1] * 2
+            if conv_layer_num == 0:
+                input_conv_time[conv_layer_num] = tf.reshape(h_conv_reshaped[-1], [-1, 1, conv_temp_window_size, input_size])
+            else:
+                input_size = num_neurons_in_convolution_layers_for_time[conv_layer_num - 1] * 2
+                input_conv_time[conv_layer_num] = tf.reshape(h_conv_time_reshaped[conv_layer_num - 1], [-1, 1, conv_temp_window_size, input_size])
+
+            W_conv_time[conv_layer_num] = weight_variable([1, 1, input_size, num_neurons_in_convolution_layers_for_time[conv_layer_num]], "convolution_time_" + str(conv_layer_num))
+            b_conv_time[conv_layer_num] = bias_variable([num_neurons_in_convolution_layers_for_time[conv_layer_num]], "convolution_time_" + str(conv_layer_num))
+            h_conv_time[conv_layer_num] = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(input_conv_time[conv_layer_num], W_conv_time[conv_layer_num], strides=[1, 1, 1, 1], padding='SAME'), b_conv_time[conv_layer_num]))
+
+            h_conv_time_reshaped[conv_layer_num] = tf.reshape(h_conv_time[conv_layer_num], [-1, conv_temp_window_size * num_neurons_in_convolution_layers_for_time[conv_layer_num]])
 
         W_fc = [None] * len(num_neurons_in_fully_connected_layers)
         b_fc = [None] * len(num_neurons_in_fully_connected_layers)
         h_fc = [None] * len(num_neurons_in_fully_connected_layers)
 
-        W_fc[0] = weight_variable([num_neurons_in_convolution_layers[-1] * temporal_window_size, num_neurons_in_fully_connected_layers[0]], "fc_0")
+        W_fc[0] = weight_variable([num_neurons_in_convolution_layers_for_time[-1] * conv_temp_window_size, num_neurons_in_fully_connected_layers[0]], "fc_0")
         b_fc[0] = bias_variable([num_neurons_in_fully_connected_layers[0]], "fc_0")
-        h_fc[0] = tf.nn.relu(tf.nn.bias_add(tf.matmul(h_conv_reshaped[-1], W_fc[0]), b_fc[0]))
+        h_fc[0] = tf.nn.relu(tf.nn.bias_add(tf.matmul(h_conv_time_reshaped[-1], W_fc[0]), b_fc[0]))
 
         for layerNum in range(1, len(num_neurons_in_fully_connected_layers)):
             W_fc[layerNum] = weight_variable([num_neurons_in_fully_connected_layers[layerNum - 1], num_neurons_in_fully_connected_layers[layerNum]], "fc_" + str(layerNum))
