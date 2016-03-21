@@ -211,8 +211,8 @@ class QBrainMemory:
             print('Path not found! ' + path)
         else:
             for file_name in os.listdir(path):
-                if file_name[:len(base_name)] is base_name and file_name[-len(extension):] is extension:
-                    self.flushed_experience_groups[file_name[len(base_name):-len(extension)]] = self.load_obj(file_name)
+                if file_name[:len(base_name)] == base_name and file_name[-len(extension):] == extension:
+                    self.flushed_experience_groups[file_name[len(base_name):-len(extension)]] = self.load_obj(path + file_name)
 
     def load_single_file(self, name):
         """
