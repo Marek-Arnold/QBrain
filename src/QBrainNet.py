@@ -133,6 +133,7 @@ class QBrainNet:
             for sensor_num in range(0, len(sensor_descriptions)):
                 sensor_group_size = adapted_sensor_data_group_sizes[sensor_num]
                 sensor_offsets[sensor_num + 1] = sensor_group_size + sensor_offsets[sensor_num]
+                print(str(sensor_offsets[sensor_num]) + ' + ' + str(temporal_window_size) + '*' + str(temporal_window_num) + '=' + str(sensor_offsets[sensor_num]) + ' + ' + str(temporal_window_size) + '*' + str(temporal_window_num))
                 sliced_adapted_data = tf.slice(adapted_sensor_data[sensor_num], [0, sensor_offsets[sensor_num] + temporal_window_size * temporal_window_num], [-1, sensor_group_size])
                 if adaptedx is None:
                     adaptedx = sliced_adapted_data
