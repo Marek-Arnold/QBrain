@@ -118,8 +118,8 @@ class QBrainNet:
                         output_size = sensor_description[3][layer_num]
                         sensor_input = h_sensor_group[layer_num - 1]
 
-                    W_sensor_group[layer_num] = weight_variable([1, 1, input_size, output_size], "sensor_group_" + str(ix) + "_layer_" + str(layer_num))
-                    b_sensor_group[layer_num] = bias_variable(output_size, "sensor_group_" + str(ix) + "_layer_" + str(layer_num))
+                    W_sensor_group[layer_num] = weight_variable([1, 1, input_size, output_size], "sensor_group_" + sensor_description[4] + "_layer_" + str(layer_num))
+                    b_sensor_group[layer_num] = bias_variable([output_size], "sensor_group_" + sensor_description[4] + "_layer_" + str(layer_num))
                     h_sensor_group[layer_num] = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(sensor_input, W_sensor_group[layer_num], strides=[1, 1, 1, 1], padding='SAME'), b_sensor_group[layer_num]))
 
                 sensor_group_size = sensor_description[3][-1]
