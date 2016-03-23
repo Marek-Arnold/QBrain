@@ -151,9 +151,9 @@ class QBrainNet:
         h_conv_reshaped = [None] * len(num_neurons_in_convolution_layers)
 
         for conv_layer_num in range(len(num_neurons_in_convolution_layers)):
-            input_size = single_input_size
             if conv_layer_num == 0:
-                input_conv[conv_layer_num] = tf.reshape(adaptedx, [-1, 1, temporal_window_size, adapted_input_size])
+                input_size = adapted_input_size
+                input_conv[conv_layer_num] = tf.reshape(adaptedx, [-1, 1, temporal_window_size, input_size])
             else:
                 input_size = num_neurons_in_convolution_layers[conv_layer_num - 1]
                 input_conv[conv_layer_num] = tf.reshape(h_conv_reshaped[conv_layer_num - 1], [-1, 1, temporal_window_size, input_size])
