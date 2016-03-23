@@ -208,7 +208,7 @@ class QBrainNet:
         self.sess.run(tf.initialize_all_variables())
         for i in range(len(sensor_descriptions)):
             print(adapted_sensor_data_group_sizes[i])
-            self.sess.run(tf.shape(adapted_sensor_data[i]))
+            self.sess.run(tf.shape(adapted_sensor_data[i]), feed_dict={self.x: [0] * self.num_inputs_total})
         self.saver = tf.train.Saver()
 
     def predict(self, x_):
