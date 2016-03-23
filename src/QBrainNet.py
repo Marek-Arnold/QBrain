@@ -126,8 +126,6 @@ class QBrainNet:
                 sensor_group_size = sensor_description[3][-1]
                 sensor_group = tf.reshape(h_sensor_group[-1], [-1, sensor_group_size * temporal_window_size])
 
-            print(tf.shape(sensor_group))
-            print(sensor_group_size)
             adapted_sensor_data[ix] = sensor_group
             adapted_sensor_data_group_sizes[ix] = sensor_group_size
 
