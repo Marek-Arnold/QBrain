@@ -61,7 +61,9 @@ class QBrainNet:
         sensor_offsets = [0] * (len(sensor_descriptions) + 1)
         adapted_sensor_data = [None] * len(sensor_descriptions)
 
-        for sensor_description, ix in sensor_descriptions:
+        for sensor_description_num in range(len(sensor_descriptions)):
+            sensor_description = sensor_descriptions[sensor_description_num]
+            ix = sensor_description_num
             sensor_offsets[ix + 1] = sensor_description[0] * sensor_description[1]
             input_index = sensor_offsets[ix]
 
