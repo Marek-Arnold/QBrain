@@ -129,7 +129,7 @@ class QBrainNet:
             adapted_sensor_data_group_sizes[ix] = sensor_group_size
 
         for temporal_window_num in range(temporal_window_size):
-            sensor_offsets = [0] * len(sensor_descriptions)
+            sensor_offsets = [0] * (len(sensor_descriptions) + 1)
             for sensor_num in range(0, len(sensor_descriptions)):
                 sensor_group_size = adapted_sensor_data_group_sizes[sensor_num]
                 sensor_offsets[sensor_num + 1] = sensor_group_size + sensor_offsets[sensor_num]
