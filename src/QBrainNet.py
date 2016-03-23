@@ -61,76 +61,80 @@ class QBrainNet:
         sensor_offsets = [0] * (len(sensor_descriptions) + 1)
         adapted_sensor_data = [None] * len(sensor_descriptions)
 
-        for sensor_description_num in range(len(sensor_descriptions)):
-            sensor_description = sensor_descriptions[sensor_description_num]
-            ix = sensor_description_num
-            sensor_offsets[ix + 1] = sensor_description[0] * sensor_description[1]
-            input_index = sensor_offsets[ix]
+        for x_in in self.x:
+            for sensor_description_num in range(len(sensor_descriptions)):
+                sensor_description = sensor_descriptions[sensor_description_num]
+                ix = sensor_description_num
+                sensor_offsets[ix + 1] = sensor_description[0] * sensor_description[1]
+                input_index = sensor_offsets[ix]
 
-            sensor_group = None
+                sensor_group = None
 
+                for temporal_window_num in range(temporal_window_size):
+                    ind = input_index
+                    for sensor_num in range(0, sensor_description[0]):
+                        tf.concat(0, sensor_group, tf.slice(x_in, ind + temporal_window_size * temporal_window_num, sensor_description[1]))
+                        ind += sensor_description[1]
+
+                sensor_group_size = sensor_description[0] * sensor_description[1]
+                sensor_group = tf.reshape(sensor_group, [-1, sensor_group_size])
+
+                if len(sensor_description[2]) > 0:
+                    W_single_sensor = [None] * len(sensor_description[2])
+                    b_single_sensor = [None] * len(sensor_description[2])
+                    h_single_sensor = [None] * len(sensor_description[2])
+
+                    reshaped_group = tf.reshape(sensor_group, [-1, 1, 1, sensor_description[1]])
+
+                    for layer_num in range(0, len(sensor_description[2])):
+                        if layer_num == 0:
+                            input_size = sensor_description[1]
+                            output_size = sensor_description[2][layer_num]
+                            sensor_input = reshaped_group
+                        else:
+                            input_size = sensor_description[2][layer_num - 1]
+                            output_size = sensor_description[2][layer_num]
+                            sensor_input = h_single_sensor[layer_num - 1]
+
+                        W_single_sensor[layer_num] = weight_variable([1, 1, input_size, output_size], "single_sensor_" + sensor_description[4] + "_layer_" + str(layer_num))
+                        b_single_sensor[layer_num] = bias_variable([sensor_description[2][layer_num]], "single_sensor_" + sensor_description[4] + "_layer_" + str(layer_num))
+                        h_single_sensor[layer_num] = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(sensor_input, W_single_sensor[layer_num], strides=[1, 1, 1, 1], padding='SAME'), b_single_sensor[layer_num]))
+
+                    sensor_group_size = sensor_description[0] * sensor_description[2][-1]
+                    sensor_group = tf.reshape(h_single_sensor[-1], [-1, sensor_group_size])
+
+                if len(sensor_description[3]) > 0:
+                    W_sensor_group = [None] * len(sensor_description[3])
+                    b_sensor_group = [None] * len(sensor_description[3])
+                    h_sensor_group = [None] * len(sensor_description[3])
+
+                    reshaped_group = tf.reshape(sensor_group, [-1, 1, 1, sensor_group_size])
+
+                    for layer_num in range(0, len(sensor_description[3])):
+                        if layer_num == 0:
+                            input_size = sensor_group_size
+                            output_size = sensor_description[3][layer_num]
+                            sensor_input = reshaped_group
+                        else:
+                            input_size = sensor_description[3][layer_num - 1]
+                            output_size = sensor_description[3][layer_num]
+                            sensor_input = h_sensor_group[layer_num - 1]
+
+                        W_sensor_group[layer_num] = weight_variable([1, 1, input_size, output_size], "sensor_group_" + str(ix) + "_layer_" + str(layer_num))
+                        b_sensor_group[layer_num] = bias_variable([sensor_description[2][layer_num]], "sensor_group_" + str(ix) + "_layer_" + str(layer_num))
+                        h_sensor_group[layer_num] = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(sensor_input, W_single_sensor[layer_num], strides=[1, 1, 1, 1], padding='SAME'), b_single_sensor[layer_num]))
+
+                    sensor_group_size = sensor_description[3][-1]
+                    sensor_group = tf.reshape(h_sensor_group[-1], [-1, sensor_group_size])
+
+                adapted_sensor_data[ix] = sensor_group
+
+            adaptedx_in = None
             for temporal_window_num in range(temporal_window_size):
-                ind = input_index
-                for sensor_num in range(0, sensor_description[0]):
-                    tf.concat(0, sensor_group, tf.slice(self.x, ind + temporal_window_size * temporal_window_num, sensor_description[1]))
-                    ind += sensor_description[1]
+                for sensor_num in range(0, len(sensor_descriptions)):
+                    adaptedx_in = tf.concat(0, adaptedx, adapted_sensor_data[sensor_num][temporal_window_num])
 
-            sensor_group_size = sensor_description[0] * sensor_description[1]
-            sensor_group = tf.reshape(sensor_group, [-1, sensor_group_size])
-
-            if len(sensor_description[2]) > 0:
-                W_single_sensor = [None] * len(sensor_description[2])
-                b_single_sensor = [None] * len(sensor_description[2])
-                h_single_sensor = [None] * len(sensor_description[2])
-
-                reshaped_group = tf.reshape(sensor_group, [-1, 1, 1, sensor_description[1]])
-
-                for layer_num in range(0, len(sensor_description[2])):
-                    if layer_num == 0:
-                        input_size = sensor_description[1]
-                        output_size = sensor_description[2][layer_num]
-                        sensor_input = reshaped_group
-                    else:
-                        input_size = sensor_description[2][layer_num - 1]
-                        output_size = sensor_description[2][layer_num]
-                        sensor_input = h_single_sensor[layer_num - 1]
-
-                    W_single_sensor[layer_num] = weight_variable([1, 1, input_size, output_size], "single_sensor_" + sensor_description[4] + "_layer_" + str(layer_num))
-                    b_single_sensor[layer_num] = bias_variable([sensor_description[2][layer_num]], "single_sensor_" + sensor_description[4] + "_layer_" + str(layer_num))
-                    h_single_sensor[layer_num] = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(sensor_input, W_single_sensor[layer_num], strides=[1, 1, 1, 1], padding='SAME'), b_single_sensor[layer_num]))
-
-                sensor_group_size = sensor_description[0] * sensor_description[2][-1]
-                sensor_group = tf.reshape(h_single_sensor[-1], [-1, sensor_group_size])
-
-            if len(sensor_description[3]) > 0:
-                W_sensor_group = [None] * len(sensor_description[3])
-                b_sensor_group = [None] * len(sensor_description[3])
-                h_sensor_group = [None] * len(sensor_description[3])
-
-                reshaped_group = tf.reshape(sensor_group, [-1, 1, 1, sensor_group_size])
-
-                for layer_num in range(0, len(sensor_description[3])):
-                    if layer_num == 0:
-                        input_size = sensor_group_size
-                        output_size = sensor_description[3][layer_num]
-                        sensor_input = reshaped_group
-                    else:
-                        input_size = sensor_description[3][layer_num - 1]
-                        output_size = sensor_description[3][layer_num]
-                        sensor_input = h_sensor_group[layer_num - 1]
-
-                    W_sensor_group[layer_num] = weight_variable([1, 1, input_size, output_size], "sensor_group_" + str(ix) + "_layer_" + str(layer_num))
-                    b_sensor_group[layer_num] = bias_variable([sensor_description[2][layer_num]], "sensor_group_" + str(ix) + "_layer_" + str(layer_num))
-                    h_sensor_group[layer_num] = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(sensor_input, W_single_sensor[layer_num], strides=[1, 1, 1, 1], padding='SAME'), b_single_sensor[layer_num]))
-
-                sensor_group_size = sensor_description[3][-1]
-                sensor_group = tf.reshape(h_sensor_group[-1], [-1, sensor_group_size])
-
-            adapted_sensor_data[ix] = sensor_group
-
-        for temporal_window_num in range(temporal_window_size):
-            for sensor_num in range(0, len(sensor_descriptions)):
-                adaptedx = tf.concat(0, adaptedx, adapted_sensor_data[sensor_num][temporal_window_num])
+            adaptedx = tf.concat(1, adaptedx, adaptedx_in)
 
 
         input_conv = [None] * len(num_neurons_in_convolution_layers)
