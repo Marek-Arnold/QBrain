@@ -71,7 +71,7 @@ class QBrainNet:
             sensor_group_size = sensor_description[0] * sensor_description[1]
 
             for temporal_window_num in range(temporal_window_size):
-                sliced_sensor = tf.slice(self.x, [0, sensor_offsets[ix] + temporal_window_size * temporal_window_num], [-1, sensor_description[0] * sensor_description[1]])
+                sliced_sensor = tf.slice(self.x, [0, sensor_offsets[ix] + single_input_size * temporal_window_num], [-1, sensor_description[0] * sensor_description[1]])
                 if sensor_group is None:
                     sensor_group = sliced_sensor
                 else:
@@ -135,8 +135,7 @@ class QBrainNet:
             for sensor_num in range(0, len(sensor_descriptions)):
                 sensor_group_size = adapted_sensor_data_group_sizes[sensor_num]
                 sensor_offsets[sensor_num + 1] = sensor_group_size + sensor_offsets[sensor_num]
-                # print(str(sensor_offsets[sensor_num]) + ' + ' + str(temporal_window_size) + '*' + str(temporal_window_num) + '=' + str(sensor_offsets[sensor_num] + temporal_window_size * temporal_window_num))
-                sliced_adapted_data = tf.slice(adapted_sensor_data[sensor_num], [0, sensor_offsets[sensor_num] + temporal_window_size * temporal_window_num], [-1, sensor_group_size])
+                sliced_adapted_data = tf.slice(adapted_sensor_data[sensor_num], [0, sensor_offsets[sensor_num] + single_input_size * temporal_window_num], [-1, sensor_group_size])
                 if adaptedx is None:
                     adaptedx = sliced_adapted_data
                 else:
@@ -206,9 +205,6 @@ class QBrainNet:
 
         self.train_step = tf.train.AdamOptimizer(1e-4).minimize(self.errors)
         self.sess.run(tf.initialize_all_variables())
-        for i in range(len(sensor_descriptions)):
-            print(adapted_sensor_data_group_sizes[i])
-            self.sess.run(tf.shape(adapted_sensor_data[i]), feed_dict={self.x: [[0] * self.num_inputs_total]})
         self.saver = tf.train.Saver()
 
     def predict(self, x_):
