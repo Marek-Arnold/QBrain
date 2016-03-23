@@ -72,7 +72,7 @@ class QBrainNet:
             for temporal_window_num in range(temporal_window_size):
                 ind = input_index
                 for sensor_num in range(0, sensor_description[0]):
-                    tf.concat(sensor_group, tf.slice(self.x, ind + temporal_window_size * temporal_window_num, sensor_description[1]))
+                    tf.concat(0, sensor_group, tf.slice(self.x, ind + temporal_window_size * temporal_window_num, sensor_description[1]))
                     ind += sensor_description[1]
 
             sensor_group_size = sensor_description[0] * sensor_description[1]
