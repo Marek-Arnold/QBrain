@@ -11,6 +11,7 @@ class QBrain:
                  single_input_size,
                  temporal_window_size,
                  num_actions,
+                 sensor_descriptions,
                  num_neurons_in_convolution_layers,
                  num_neurons_in_convolution_layers_for_time,
                  num_neurons_in_fully_connected_layers):
@@ -23,6 +24,12 @@ class QBrain:
             Number of observations to use for each prediction.
         :param num_actions: int
             The number of possible actions that can be taken.
+        :param sensor_descriptions: list of tuple of int and int and list of int
+            List of tuples that describe the sensors [(num_sensors, num_inputs_per_sensor, network_per_sensor, network_for_sensors)]
+            num_sensors: Number of sensors of this kind.
+            num_inputs_per_sensor: Number of features one sensor observes.
+            network_per_sensor: List of int to describe the network to use for the processing of this single sensor.
+            network_for_sensors: List of int to describe the network to use for all sensors of this kind in one time step.
         :param num_neurons_in_convolution_layers: list of int
             Number of features in the convolution layers that should be learned for the representation of a single input.
         :param num_neurons_in_convolution_layers_for_time: list of int
@@ -40,6 +47,7 @@ class QBrain:
         self.net = QBrainNet(single_input_size,
                              temporal_window_size,
                              num_actions,
+                             sensor_descriptions,
                              num_neurons_in_convolution_layers,
                              num_neurons_in_convolution_layers_for_time,
                              num_neurons_in_fully_connected_layers)

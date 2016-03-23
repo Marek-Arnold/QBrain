@@ -3,19 +3,29 @@ import json
 import os
 from QBrain import QBrain
 
-num_input_wall_distance = 2 + 1 * 4
-num_sensor_enemy = 16
-num_input_enemy = num_sensor_enemy * 4
+num_input_wall_distance = 2 + 2 * 4
+num_sensor_enemy = 32
+num_sensor_enemy_inputs = 4
+num_input_enemy = num_sensor_enemy * num_sensor_enemy_inputs
 num_input_hit_by_bullet_damage = 3
 num_inputs = num_input_wall_distance + num_input_enemy + num_input_hit_by_bullet_damage
 num_actions = 6
-temporal_window = 64
+temporal_window = 128
 single_input_size = num_inputs + num_actions
+sensor_descriptions = [(num_input_wall_distance, 1, [], [8, 16, 4], 'Walls'),
+                       (num_sensor_enemy, num_sensor_enemy_inputs, [8, 16, 4], [64, 128, 80], 'Spotted_Enemy'),
+                       (num_input_hit_by_bullet_damage, 1, [], [4, 8, 4], 'Hit_By_Bullet'),
+                       (1, num_actions, [8, 16, 4], [], 'Taken_Action')]
 num_neurons_in_convolution_layers = [128, 256, 64]
 num_neurons_in_convolution_layers_for_time = [96, 144, 216, 324]
 num_neurons_in_fully_connected_layers = [2056, 1024, 512, 256]
 
-brain = QBrain(single_input_size, temporal_window, num_actions, num_neurons_in_convolution_layers,
+brain = QBrain(single_input_size,
+               temporal_window,
+               num_actions,
+               sensor_descriptions,
+               num_neurons_in_convolution_layers,
+               num_neurons_in_convolution_layers_for_time,
                num_neurons_in_fully_connected_layers)
 
 if os.path.exists('saves/'):
@@ -41,14 +51,14 @@ class ForwardResource:
             ind = 'de_' + str(i)
             if ind in body:
                 d = float(body[ind])
-		e = float(body['ee_' + str(i)])
-		h = float(body['he_' + str(i)])
-		v = float(body['ve_' + str(i)])
+                e = float(body['ee_' + str(i)])
+                h = float(body['he_' + str(i)])
+                v = float(body['ve_' + str(i)])
             else:
                 d = 0
-		e = 0
-		h = 0
-		v = 0
+                e = 0
+                h = 0
+                v = 0
             array_with_num_inputs_numbers.append(d)
             array_with_num_inputs_numbers.append(e)
             array_with_num_inputs_numbers.append(h)
@@ -61,8 +71,6 @@ class ForwardResource:
             else:
                 d = 0
             array_with_num_inputs_numbers.append(d)
-
-	print(str(len(array_with_num_inputs_numbers)) + ' of ' + str(num_inputs))
 
         group_name = 'default'
         if 'gn' in body:
@@ -94,14 +102,14 @@ class ExpertForwardResource:
             ind = 'de_' + str(i)
             if ind in body:
                 d = float(body[ind])
-		e = float(body['ee_' + str(i)])
-		h = float(body['he_' + str(i)])
-		v = float(body['ve_' + str(i)])
+                e = float(body['ee_' + str(i)])
+                h = float(body['he_' + str(i)])
+                v = float(body['ve_' + str(i)])
             else:
                 d = 0
-		e = 0
-		h = 0
-		v = 0
+                e = 0
+                h = 0
+                v = 0
             array_with_num_inputs_numbers.append(d)
             array_with_num_inputs_numbers.append(e)
             array_with_num_inputs_numbers.append(h)
@@ -116,7 +124,7 @@ class ExpertForwardResource:
                 d = 0
             array_with_num_inputs_numbers.append(d)
 
-	print(str(len(array_with_num_inputs_numbers)) + ' of ' + str(num_inputs))
+        print(str(len(array_with_num_inputs_numbers)) + ' of ' + str(num_inputs))
 
         group_name = 'default'
         if 'gn' in body:
