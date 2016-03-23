@@ -206,6 +206,9 @@ class QBrainNet:
 
         self.train_step = tf.train.AdamOptimizer(1e-4).minimize(self.errors)
         self.sess.run(tf.initialize_all_variables())
+        for i in range(len(sensor_descriptions)):
+            print(adapted_sensor_data_group_sizes[i])
+            self.sess.run(tf.shape(adapted_sensor_data[i]))
         self.saver = tf.train.Saver()
 
     def predict(self, x_):
