@@ -61,7 +61,8 @@ class QBrainNet:
         sensor_offsets = [0] * (len(sensor_descriptions) + 1)
         adapted_sensor_data = [None] * len(sensor_descriptions)
 
-        for x_in in self.x:
+        for x_num in range(tf.shape(self.x)[0]):
+            x_in = self.x[x_num]
             for sensor_description_num in range(len(sensor_descriptions)):
                 sensor_description = sensor_descriptions[sensor_description_num]
                 ix = sensor_description_num
