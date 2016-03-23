@@ -57,6 +57,7 @@ class QBrainNet:
             return tf.Variable(initial, name="bias_" + name)
 
         adaptedx = None
+        adapted_input_size = single_input_size
 
         sensor_offsets = [0] * (len(sensor_descriptions) + 1)
         adapted_sensor_data = [None] * len(sensor_descriptions)
@@ -139,6 +140,10 @@ class QBrainNet:
                 else:
                     adaptedx = tf.concat(1, [adaptedx, sliced_adapted_data])
 
+        adapted_input_size = 0
+        for sensor_num in range(0, len(sensor_descriptions)):
+            adapted_input_size += adapted_sensor_data_group_sizes[sensor_num]
+
         input_conv = [None] * len(num_neurons_in_convolution_layers)
         W_conv = [None] * len(num_neurons_in_convolution_layers)
         b_conv = [None] * len(num_neurons_in_convolution_layers)
@@ -148,7 +153,7 @@ class QBrainNet:
         for conv_layer_num in range(len(num_neurons_in_convolution_layers)):
             input_size = single_input_size
             if conv_layer_num == 0:
-                input_conv[conv_layer_num] = tf.reshape(adaptedx, [-1, 1, temporal_window_size, single_input_size])
+                input_conv[conv_layer_num] = tf.reshape(adaptedx, [-1, 1, temporal_window_size, adapted_input_size])
             else:
                 input_size = num_neurons_in_convolution_layers[conv_layer_num - 1]
                 input_conv[conv_layer_num] = tf.reshape(h_conv_reshaped[conv_layer_num - 1], [-1, 1, temporal_window_size, input_size])
