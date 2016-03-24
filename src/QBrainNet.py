@@ -46,7 +46,6 @@ class QBrainNet:
         self.num_actions = num_actions
         self.sensor_descriptions = sensor_descriptions
         self.savers = {}
-        self.sensor_variables = {}
 
         self.sess = tf.InteractiveSession()
         self.x = tf.placeholder(tf.float32, shape=[None, self.num_inputs_total])
@@ -112,10 +111,9 @@ class QBrainNet:
                     h_single_sensor[layer_num] = tf.nn.relu(tf.nn.bias_add(
                         tf.nn.conv2d(sensor_input, W_single_sensor[layer_num], strides=[1, 1, 1, 1], padding='SAME'),
                         b_single_sensor[layer_num]))
-                    self.sensor_variables[sensor_name].append(W_single_sensor)
-                    self.sensor_variables[sensor_name].append(b_single_sensor)
 
-                single_sensor_variables = W_single_sensor
+                single_sensor_variables = []
+                single_sensor_variables.extend(W_single_sensor)
                 single_sensor_variables.extend(b_single_sensor)
                 self.savers[sensor_name + '_single_sensor'] = tf.train.Saver(single_sensor_variables)
 
@@ -146,7 +144,8 @@ class QBrainNet:
                         tf.nn.conv2d(sensor_input, W_sensor_group[layer_num], strides=[1, 1, 1, 1], padding='SAME'),
                         b_sensor_group[layer_num]))
 
-                sensor_group_variables = W_sensor_group
+                sensor_group_variables = []
+                sensor_group_variables.extend(W_sensor_group)
                 sensor_group_variables.extend(b_sensor_group)
                 self.savers[sensor_name + '_single_sensor'] = tf.train.Saver(sensor_group_variables)
 
@@ -197,7 +196,8 @@ class QBrainNet:
             h_conv_reshaped[conv_layer_num] = tf.reshape(h_conv[conv_layer_num],
                                                          [-1, temporal_window_size * num_neurons_in_convolution_layers[conv_layer_num]])
 
-        single_time_frame_net_variables = W_conv
+        single_time_frame_net_variables = []
+        single_time_frame_net_variables.extend(W_conv)
         single_time_frame_net_variables.extend(b_conv)
         self.savers['single_time_frame_net'] = tf.train.Saver(single_time_frame_net_variables)
 
@@ -229,8 +229,8 @@ class QBrainNet:
 
             h_conv_time_reshaped[conv_layer_num] = tf.reshape(h_conv_time[conv_layer_num],
                                                               [-1, conv_temp_window_size * num_neurons_in_convolution_layers_for_time[conv_layer_num]])
-
-        two_time_frames_net_variables = W_conv_time
+        two_time_frames_net_variables = []
+        two_time_frames_net_variables.extend(W_conv_time)
         two_time_frames_net_variables.extend(b_conv_time)
         self.savers['two_time_frames_net'] = tf.train.Saver(two_time_frames_net_variables)
 
@@ -248,14 +248,16 @@ class QBrainNet:
             b_fc[layerNum] = bias_variable([num_neurons_in_fully_connected_layers[layerNum]], "fc_" + str(layerNum))
             h_fc[layerNum] = tf.nn.relu(tf.nn.bias_add(tf.matmul(h_fc[layerNum - 1], W_fc[layerNum]), b_fc[layerNum]))
 
-        fully_connected_net_variables = W_fc
+        fully_connected_net_variables = []
+        fully_connected_net_variables.extend(W_fc)
         fully_connected_net_variables.extend(b_fc)
         self.savers['fully_connected_net'] = tf.train.Saver(fully_connected_net_variables)
 
         W_fc_last = weight_variable([num_neurons_in_fully_connected_layers[-1], num_actions], "fc_last")
         b_fc_last = bias_variable([num_actions], "fc_last")
 
-        action_net_variables = W_fc_last
+        action_net_variables = []
+        action_net_variables.extend(W_fc_last)
         action_net_variables.extend(b_fc_last)
         self.savers['action_net'] = tf.train.Saver(action_net_variables)
 
