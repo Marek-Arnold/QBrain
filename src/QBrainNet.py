@@ -234,12 +234,6 @@ class QBrainNet:
 
         self.train_step = tf.train.AdamOptimizer(1e-5).minimize(self.errors)
         self.sess.run(tf.initialize_all_variables())
-        dummy_data = []
-        for temporal_window_num in range(temporal_window_size):
-            for sensor_description_num in range(len(sensor_descriptions)):
-                sensor_description = sensor_descriptions[sensor_description_num]
-                dummy_data.extend([sensor_description_num] * sensor_description[0] * sensor_description[1])
-        print(self.sess.run(adaptedx, feed_dict={self.x: [dummy_data]}))
         self.saver = tf.train.Saver()
 
     def predict(self, x_):
