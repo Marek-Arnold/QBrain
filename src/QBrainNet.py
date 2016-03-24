@@ -255,8 +255,8 @@ class QBrainNet:
         b_fc_last = bias_variable([num_actions], "fc_last")
 
         action_net_variables = []
-        action_net_variables.extend(W_fc_last)
-        action_net_variables.extend(b_fc_last)
+        action_net_variables.append(W_fc_last)
+        action_net_variables.append(b_fc_last)
         self.savers['action_net'] = tf.train.Saver(action_net_variables)
 
         self.predicted_action_values = tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_last), b_fc_last)
