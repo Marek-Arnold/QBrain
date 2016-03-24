@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os
 
 
 class QBrainNet:
@@ -49,7 +50,7 @@ class QBrainNet:
         self.y_ = tf.placeholder(tf.float32, shape=[None, self.num_actions])
 
         def weight_variable(shape, name):
-            initial = tf.truncated_normal(shape, stddev=0.1)
+            initial = tf.truncated_normal(shape, stddev=0.01)
             return tf.Variable(initial, name="weights_" + name)
 
         def bias_variable(shape, name):
@@ -204,7 +205,7 @@ class QBrainNet:
 
         self.errors = tf.reduce_sum(tf.abs((self.y_ - self.predicted_action_values) * self.y_))
 
-        self.train_step = tf.train.AdamOptimizer(1e-4).minimize(self.errors)
+        self.train_step = tf.train.AdamOptimizer(1e-5).minimize(self.errors)
         self.sess.run(tf.initialize_all_variables())
         self.saver = tf.train.Saver()
 
@@ -268,4 +269,5 @@ class QBrainNet:
         -------
         :return: None
         """
-        self.saver.restore(self.sess, model_name)
+        if os.path.exists(model_name):
+            self.saver.restore(self.sess, model_name)

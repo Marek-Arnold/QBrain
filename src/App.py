@@ -12,10 +12,10 @@ num_inputs = num_input_wall_distance + num_input_enemy + num_input_hit_by_bullet
 num_actions = 6
 temporal_window = 128
 single_input_size = num_inputs + num_actions
-sensor_descriptions = [(num_input_wall_distance, 1, [], [8, 16, 4], 'Walls'),
-                       (num_sensor_enemy, num_sensor_enemy_inputs, [8, 16, 4], [64, 128, 80], 'Spotted_Enemy'),
-                       (num_input_hit_by_bullet_damage, 1, [], [4, 8, 4], 'Hit_By_Bullet'),
-                       (1, num_actions, [8, 16, 4], [], 'Taken_Action')]
+sensor_descriptions = [(num_input_wall_distance, 1, [], [], 'Walls'),
+                       (num_sensor_enemy, num_sensor_enemy_inputs, [8, 16, 24], [128, 256, 128], 'Spotted_Enemy'),
+                       (num_input_hit_by_bullet_damage, 1, [], [], 'Hit_By_Bullet'),
+                       (num_actions, 1, [], [], 'Taken_Action')]
 num_neurons_in_convolution_layers = [128, 256, 64]
 num_neurons_in_convolution_layers_for_time = [96, 144, 216, 324]
 num_neurons_in_fully_connected_layers = [2056, 1024, 512, 256]
