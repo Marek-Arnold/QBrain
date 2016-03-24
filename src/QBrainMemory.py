@@ -212,7 +212,7 @@ class QBrainMemory:
         else:
             for file_name in os.listdir(path):
                 if file_name[:len(base_name)] == base_name and file_name[-len(extension):] == extension:
-                    self.flushed_experience_groups[file_name[len(base_name):-len(extension)]] = self.load_obj(path + file_name)
+                    self.flushed_experience_groups[file_name[len(base_name) + 1:-len(extension)]] = self.load_obj(path + file_name)
 
     def load_single_file(self, name):
         """
