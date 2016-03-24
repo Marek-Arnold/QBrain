@@ -168,19 +168,17 @@ class QBrainNet:
         for sensor_num in range(0, len(sensor_descriptions)):
             adapted_input_size += adapted_sensor_data_group_sizes[sensor_num]
 
-        input_conv = [None] * len(num_neurons_in_convolution_layers)
         W_conv = [None] * len(num_neurons_in_convolution_layers)
         b_conv = [None] * len(num_neurons_in_convolution_layers)
         h_conv = [None] * len(num_neurons_in_convolution_layers)
-        h_conv_reshaped = [None] * len(num_neurons_in_convolution_layers)
 
         for conv_layer_num in range(len(num_neurons_in_convolution_layers)):
             if conv_layer_num == 0:
                 input_size = adapted_input_size
-                input_conv[conv_layer_num] = tf.reshape(adaptedx, [-1, 1, temporal_window_size, input_size])
+                input_conv = tf.reshape(adaptedx, [-1, 1, temporal_window_size, input_size])
             else:
                 input_size = num_neurons_in_convolution_layers[conv_layer_num - 1]
-                input_conv[conv_layer_num] = tf.reshape(h_conv_reshaped[conv_layer_num - 1],
+                input_conv = tf.reshape(h_conv[conv_layer_num - 1],
                                                         [-1, 1, temporal_window_size, input_size])
 
             W_conv[conv_layer_num] = weight_variable([1, 1, input_size, num_neurons_in_convolution_layers[conv_layer_num]],
@@ -188,63 +186,63 @@ class QBrainNet:
             b_conv[conv_layer_num] = bias_variable([num_neurons_in_convolution_layers[conv_layer_num]],
                                                    "convolution_" + str(conv_layer_num))
             h_conv[conv_layer_num] = tf.nn.relu(tf.nn.bias_add(
-                tf.nn.conv2d(input_conv[conv_layer_num], W_conv[conv_layer_num], strides=[1, 1, 1, 1], padding='SAME'),
+                tf.nn.conv2d(input_conv, W_conv[conv_layer_num], strides=[1, 1, 1, 1], padding='SAME'),
                 b_conv[conv_layer_num]))
-
-            h_conv_reshaped[conv_layer_num] = tf.reshape(h_conv[conv_layer_num],
-                                                         [-1, temporal_window_size * num_neurons_in_convolution_layers[conv_layer_num]])
 
         single_time_frame_net_variables = []
         single_time_frame_net_variables.extend(W_conv)
         single_time_frame_net_variables.extend(b_conv)
         self.savers['single_time_frame_net'] = tf.train.Saver(single_time_frame_net_variables)
 
-        input_conv_time = [None] * len(num_neurons_in_convolution_layers_for_time)
+        h_conv_reshaped = tf.reshape(h_conv[-1],
+                                     [-1, temporal_window_size * num_neurons_in_convolution_layers[-1]])
         W_conv_time = [None] * len(num_neurons_in_convolution_layers_for_time)
         b_conv_time = [None] * len(num_neurons_in_convolution_layers_for_time)
         h_conv_time = [None] * len(num_neurons_in_convolution_layers_for_time)
-        h_conv_time_reshaped = [None] * len(num_neurons_in_convolution_layers_for_time)
 
         conv_temp_window_size = temporal_window_size
         for conv_layer_num in range(len(num_neurons_in_convolution_layers_for_time)):
             conv_temp_window_size /= 2
             input_size = num_neurons_in_convolution_layers[-1] * 2
             if conv_layer_num == 0:
-                input_conv_time[conv_layer_num] = tf.reshape(h_conv_reshaped[-1],
-                                                             [-1, 1, conv_temp_window_size, input_size])
+                input_conv_time = tf.reshape(h_conv_reshaped[-1],
+                                             [-1, 1, conv_temp_window_size, input_size])
             else:
                 input_size = num_neurons_in_convolution_layers_for_time[conv_layer_num - 1] * 2
-                input_conv_time[conv_layer_num] = tf.reshape(h_conv_time_reshaped[conv_layer_num - 1],
-                                                             [-1, 1, conv_temp_window_size, input_size])
+                input_conv_time = tf.reshape(h_conv_time[conv_layer_num - 1],
+                                             [-1, 1, conv_temp_window_size, input_size])
 
             W_conv_time[conv_layer_num] = weight_variable([1, 1, input_size, num_neurons_in_convolution_layers_for_time[conv_layer_num]],
                                                           "convolution_time_" + str(conv_layer_num))
             b_conv_time[conv_layer_num] = bias_variable([num_neurons_in_convolution_layers_for_time[conv_layer_num]],
                                                         "convolution_time_" + str(conv_layer_num))
             h_conv_time[conv_layer_num] = tf.nn.relu(tf.nn.bias_add(
-                tf.nn.conv2d(input_conv_time[conv_layer_num], W_conv_time[conv_layer_num], strides=[1, 1, 1, 1], padding='SAME'),
+                tf.nn.conv2d(input_conv_time, W_conv_time[conv_layer_num], strides=[1, 1, 1, 1], padding='SAME'),
                 b_conv_time[conv_layer_num]))
 
-            h_conv_time_reshaped[conv_layer_num] = tf.reshape(h_conv_time[conv_layer_num],
-                                                              [-1, conv_temp_window_size * num_neurons_in_convolution_layers_for_time[conv_layer_num]])
         two_time_frames_net_variables = []
         two_time_frames_net_variables.extend(W_conv_time)
         two_time_frames_net_variables.extend(b_conv_time)
         self.savers['two_time_frames_net'] = tf.train.Saver(two_time_frames_net_variables)
 
+        h_conv_time_reshaped = tf.reshape(h_conv_time[-1],
+                                          [-1, conv_temp_window_size * num_neurons_in_convolution_layers_for_time[-1]])
         W_fc = [None] * len(num_neurons_in_fully_connected_layers)
         b_fc = [None] * len(num_neurons_in_fully_connected_layers)
         h_fc = [None] * len(num_neurons_in_fully_connected_layers)
 
-        W_fc[0] = weight_variable([num_neurons_in_convolution_layers_for_time[-1] * conv_temp_window_size, num_neurons_in_fully_connected_layers[0]], "fc_0")
-        b_fc[0] = bias_variable([num_neurons_in_fully_connected_layers[0]], "fc_0")
-        h_fc[0] = tf.nn.relu(tf.nn.bias_add(tf.matmul(h_conv_time_reshaped[-1], W_fc[0]), b_fc[0]))
+        for layerNum in range(len(num_neurons_in_fully_connected_layers)):
+            if layerNum == 0:
+                fc_input = h_conv_time_reshaped
+                fc_input_size = num_neurons_in_convolution_layers_for_time[-1] * conv_temp_window_size
+            else:
+                fc_input = h_fc[layerNum - 1]
+                fc_input_size = num_neurons_in_fully_connected_layers[layerNum - 1]
+            fc_output_size = num_neurons_in_fully_connected_layers[layerNum]
 
-        for layerNum in range(1, len(num_neurons_in_fully_connected_layers)):
-            W_fc[layerNum] = weight_variable([num_neurons_in_fully_connected_layers[layerNum - 1], num_neurons_in_fully_connected_layers[layerNum]],
-                                             "fc_" + str(layerNum))
-            b_fc[layerNum] = bias_variable([num_neurons_in_fully_connected_layers[layerNum]], "fc_" + str(layerNum))
-            h_fc[layerNum] = tf.nn.relu(tf.nn.bias_add(tf.matmul(h_fc[layerNum - 1], W_fc[layerNum]), b_fc[layerNum]))
+            W_fc[layerNum] = weight_variable([fc_input_size, fc_output_size], "fc_" + str(layerNum))
+            b_fc[layerNum] = bias_variable([fc_output_size], "fc_" + str(layerNum))
+            h_fc[layerNum] = tf.nn.relu(tf.nn.bias_add(tf.matmul(fc_input, W_fc[layerNum]), b_fc[layerNum]))
 
         fully_connected_net_variables = []
         fully_connected_net_variables.extend(W_fc)

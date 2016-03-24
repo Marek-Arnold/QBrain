@@ -1,6 +1,5 @@
 import falcon
 import json
-import os
 from QBrain import QBrain
 
 num_input_wall_distance = 2 + 2 * 4
@@ -28,9 +27,7 @@ brain = QBrain(single_input_size,
                num_neurons_in_convolution_layers_for_time,
                num_neurons_in_fully_connected_layers)
 
-if os.path.exists('saves/'):
-    files = os.listdir('saves/')
-    brain.load('xx_autosave')
+brain.load('xx_autosave')
 
 
 class ForwardResource:
