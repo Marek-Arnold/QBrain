@@ -205,7 +205,7 @@ class QBrainNet:
             conv_temp_window_size /= 2
             input_size = num_neurons_in_convolution_layers[-1] * 2
             if conv_layer_num == 0:
-                input_conv_time = tf.reshape(h_conv_reshaped[-1],
+                input_conv_time = tf.reshape(h_conv_reshaped,
                                              [-1, 1, conv_temp_window_size, input_size])
             else:
                 input_size = num_neurons_in_convolution_layers_for_time[conv_layer_num - 1] * 2
