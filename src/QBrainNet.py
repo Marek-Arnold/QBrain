@@ -73,8 +73,6 @@ class QBrainNet:
             sensor_group_net = sensor_description[3]
             sensor_name = sensor_description[4]
 
-            self.sensor_variables[sensor_name] = []
-
             sensor_group_size = num_sensors * single_sensor_size
 
             sensor_offsets[ix + 1] = sensor_group_size + sensor_offsets[ix]
