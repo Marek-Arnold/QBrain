@@ -129,7 +129,7 @@ class QBrain:
             print("Batch was none!")
             return
         print('\ttrain')
-        self.net.train(batch[0], batch[1], num_iter, max_error)
+        self.net.train(batch[0], batch[1], num_iter, max_error, None)
 
     def post_reward(self, group_name, reward, start_time, duration):
         """
