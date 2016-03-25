@@ -301,17 +301,17 @@ class QBrainNet:
         """
         variables = ['fully_connected_net']
         if variables is None:
-            trainer = tf.train.AdamOptimizer(learning_rate=1e-4)
+            trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors)
         else:
             var_list = []
             for var_name in variables:
                 var_list.append(self.variables[var_name])
 
-            trainer = tf.train.AdamOptimizer(learning_rate=1e-4, var_list=var_list)
+            trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors, var_list=var_list)
         for i in range(num_iterations):
             feed_dict = {self.x: x_, self.y_: y_}
 
-            trainer.minimize(self.errors).run(session=self.sess, feed_dict=feed_dict)
+            trainer.run(session=self.sess, feed_dict=feed_dict)
             error = self.sess.run(self.errors, feed_dict=feed_dict) / float(len(y_) / self.num_actions)
             print('\t\tloss: ' + str(error))
             if error < max_error:
