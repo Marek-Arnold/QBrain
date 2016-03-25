@@ -277,7 +277,7 @@ class QBrainNet:
         """
         return self.sess.run(self.predicted_action_values, feed_dict={self.x: x_})
 
-    def train(self, x_, y_, num_iterations):
+    def train(self, x_, y_, num_iterations, max_error):
         """
         Parameters
         ----------
@@ -295,7 +295,10 @@ class QBrainNet:
         for i in range(num_iterations):
             feed_dict = {self.x: x_, self.y_: y_}
             self.train_step.run(session=self.sess, feed_dict=feed_dict)
-            print('\t\tloss: ' + str(self.sess.run(self.errors, feed_dict=feed_dict) / float(len(y_) / self.num_actions)))
+            error = self.sess.run(self.errors, feed_dict=feed_dict) / float(len(y_) / self.num_actions)
+            print('\t\tloss: ' + str(error))
+            if error < max_error:
+                break
 
     def save_multi_file(self, model_base_name, extension):
         for saver_name in self.savers:

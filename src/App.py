@@ -158,7 +158,11 @@ class TrainResource:
         if 'bs' in body:
             batch_size = int(body['bs'])
 
-        brain.train(batch_size, num_iter)
+        max_error = 1.0
+        if 'er' in body:
+            max_error = float(body['er'])
+
+        brain.train(batch_size, num_iter, max_error)
 
 
 class RewardResource:
