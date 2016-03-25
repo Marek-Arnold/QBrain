@@ -308,6 +308,8 @@ class QBrainNet:
                 var_list.extend(self.variables[var_name])
 
             trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors, var_list=var_list)
+
+        self.sess.run(tf.initialize_variables([trainer]))
         for i in range(num_iterations):
             feed_dict = {self.x: x_, self.y_: y_}
 
