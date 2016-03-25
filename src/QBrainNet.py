@@ -268,7 +268,7 @@ class QBrainNet:
 
         self.errors = tf.reduce_sum(tf.abs((self.y_ - self.predicted_action_values) * self.y_))
 
-        self.trainer = tf.train.AdamOptimizer(1e-5)
+        self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors, var_list=[].extend(self.variables['fully_connected_net']))
         self.sess.run(tf.initialize_all_variables())
         self.saver = tf.train.Saver()
 
@@ -309,11 +309,10 @@ class QBrainNet:
 
             trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors, var_list=var_list)
 
-        self.sess.run(tf.initialize_variables([trainer]))
         for i in range(num_iterations):
             feed_dict = {self.x: x_, self.y_: y_}
 
-            trainer.run(session=self.sess, feed_dict=feed_dict)
+            self.trainer.run(session=self.sess, feed_dict=feed_dict)
             error = self.sess.run(self.errors, feed_dict=feed_dict) / float(len(y_) / self.num_actions)
             print('\t\tloss: ' + str(error))
             if error < max_error:
