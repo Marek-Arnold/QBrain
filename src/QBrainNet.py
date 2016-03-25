@@ -46,6 +46,7 @@ class QBrainNet:
         self.num_actions = num_actions
         self.sensor_descriptions = sensor_descriptions
         self.savers = {}
+        self.variables = {}
 
         self.sess = tf.InteractiveSession()
         self.x = tf.placeholder(tf.float32, shape=[None, self.num_inputs_total])
@@ -114,6 +115,7 @@ class QBrainNet:
                 single_sensor_variables.extend(W_single_sensor)
                 single_sensor_variables.extend(b_single_sensor)
                 self.savers[sensor_name + '_single_sensor'] = tf.train.Saver(single_sensor_variables)
+                self.variables[sensor_name + '_single_sensor'] = single_sensor_variables
 
                 sensor_group_size = num_sensors * single_sensor_net[-1]
                 sensor_group = tf.reshape(h_single_sensor[-1], [-1, sensor_group_size * temporal_window_size])
@@ -145,7 +147,8 @@ class QBrainNet:
                 sensor_group_variables = []
                 sensor_group_variables.extend(W_sensor_group)
                 sensor_group_variables.extend(b_sensor_group)
-                self.savers[sensor_name + '_single_sensor'] = tf.train.Saver(sensor_group_variables)
+                self.savers[sensor_name + '_sensor_group'] = tf.train.Saver(sensor_group_variables)
+                self.variables[sensor_name + '_sensor_group'] = sensor_group_variables
 
                 sensor_group_size = sensor_group_net[-1]
                 sensor_group = tf.reshape(h_sensor_group[-1], [-1, sensor_group_size * temporal_window_size])
@@ -193,6 +196,7 @@ class QBrainNet:
         single_time_frame_net_variables.extend(W_conv)
         single_time_frame_net_variables.extend(b_conv)
         self.savers['single_time_frame_net'] = tf.train.Saver(single_time_frame_net_variables)
+        self.variables['single_time_frame_net'] = single_time_frame_net_variables
 
         h_conv_reshaped = tf.reshape(h_conv[-1],
                                      [-1, temporal_window_size * num_neurons_in_convolution_layers[-1]])
@@ -224,6 +228,7 @@ class QBrainNet:
         two_time_frames_net_variables.extend(W_conv_time)
         two_time_frames_net_variables.extend(b_conv_time)
         self.savers['two_time_frames_net'] = tf.train.Saver(two_time_frames_net_variables)
+        self.variables['two_time_frames_net'] = two_time_frames_net_variables
 
         h_conv_time_reshaped = tf.reshape(h_conv_time[-1],
                                           [-1, conv_temp_window_size * num_neurons_in_convolution_layers_for_time[-1]])
@@ -248,6 +253,7 @@ class QBrainNet:
         fully_connected_net_variables.extend(W_fc)
         fully_connected_net_variables.extend(b_fc)
         self.savers['fully_connected_net'] = tf.train.Saver(fully_connected_net_variables)
+        self.variables['fully_connected_net'] = fully_connected_net_variables
 
         W_fc_last = weight_variable([num_neurons_in_fully_connected_layers[-1], num_actions], "fc_last")
         b_fc_last = bias_variable([num_actions], "fc_last")
@@ -256,12 +262,13 @@ class QBrainNet:
         action_net_variables.append(W_fc_last)
         action_net_variables.append(b_fc_last)
         self.savers['action_net'] = tf.train.Saver(action_net_variables)
+        self.variables['action_net'] = action_net_variables
 
         self.predicted_action_values = tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_last), b_fc_last)
 
         self.errors = tf.reduce_sum(tf.abs((self.y_ - self.predicted_action_values) * self.y_))
 
-        self.train_step = tf.train.AdamOptimizer(1e-5).minimize(self.errors)
+        self.trainer = tf.train.AdamOptimizer(1e-5)
         self.sess.run(tf.initialize_all_variables())
         self.saver = tf.train.Saver()
 
@@ -277,7 +284,7 @@ class QBrainNet:
         """
         return self.sess.run(self.predicted_action_values, feed_dict={self.x: x_})
 
-    def train(self, x_, y_, num_iterations, max_error):
+    def train(self, x_, y_, num_iterations, max_error, variables):
         """
         Parameters
         ----------
@@ -292,9 +299,19 @@ class QBrainNet:
         -------
         :return: None
         """
+        variables = ['fully_connected_net']
+        if variables is None:
+            trainer = tf.train.AdamOptimizer(learning_rate=1e-4)
+        else:
+            var_list = []
+            for var_name in variables:
+                var_list.append(variables[var_name])
+
+            trainer = tf.train.AdamOptimizer(learning_rate=1e-4, var_list=var_list)
         for i in range(num_iterations):
             feed_dict = {self.x: x_, self.y_: y_}
-            self.train_step.run(session=self.sess, feed_dict=feed_dict)
+
+            trainer.minimize(self.errors).run(session=self.sess, feed_dict=feed_dict)
             error = self.sess.run(self.errors, feed_dict=feed_dict) / float(len(y_) / self.num_actions)
             print('\t\tloss: ' + str(error))
             if error < max_error:
