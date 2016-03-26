@@ -12,12 +12,12 @@ num_actions = 6
 temporal_window = 128
 single_input_size = num_inputs + num_actions
 sensor_descriptions = [(num_input_wall_distance, 1, [], [], 'Walls'),
-                       (num_sensor_enemy, num_sensor_enemy_inputs, [24], [128, 256], 'Spotted_Enemy'),
+                       (num_sensor_enemy, num_sensor_enemy_inputs, [16], [128, 128], 'Spotted_Enemy'),
                        (num_input_hit_by_bullet_damage, 1, [], [], 'Hit_By_Bullet'),
                        (num_actions, 1, [], [], 'Taken_Action')]
 num_neurons_in_convolution_layers = [256, 256]
-num_neurons_in_convolution_layers_for_time = [384, 256]
-num_neurons_in_fully_connected_layers = [2056, 1024, 512, 256]
+num_neurons_in_convolution_layers_for_time = [384, 512, 768, 1024, 512]
+num_neurons_in_fully_connected_layers = [1024, 512, 256]
 
 brain = QBrain(single_input_size,
                temporal_window,
