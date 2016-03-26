@@ -270,7 +270,7 @@ class QBrainNet:
         self.errors = tf.reduce_sum(tf.abs((self.y_ - self.predicted_action_values) * self.y_))
 
         for var_name in self.variables:
-            self.trainers = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors, var_list=self.variables[var_name])
+            self.trainers[var_name] = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors, var_list=self.variables[var_name])
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors)
         self.sess.run(tf.initialize_all_variables())
         self.saver = tf.train.Saver()
