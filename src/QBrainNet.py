@@ -299,16 +299,7 @@ class QBrainNet:
         -------
         :return: None
         """
-        variables = ['fully_connected_net']
-        if variables is None:
-            trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors)
-        else:
-            var_list = []
-            for var_name in variables:
-                var_list.extend(self.variables[var_name])
-
-            trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors, var_list=var_list)
-
+        
         for i in range(num_iterations):
             feed_dict = {self.x: x_, self.y_: y_}
 
