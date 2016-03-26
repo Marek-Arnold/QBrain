@@ -47,6 +47,7 @@ class QBrainNet:
         self.sensor_descriptions = sensor_descriptions
         self.savers = {}
         self.variables = {}
+        self.trainers = {}
 
         self.sess = tf.InteractiveSession()
         self.x = tf.placeholder(tf.float32, shape=[None, self.num_inputs_total])
@@ -268,7 +269,9 @@ class QBrainNet:
 
         self.errors = tf.reduce_sum(tf.abs((self.y_ - self.predicted_action_values) * self.y_))
 
-        self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors, var_list=self.variables['fully_connected_net'])
+        for var_name in self.variables:
+            self.trainers = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors, var_list=self.variables[var_name])
+        self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors)
         self.sess.run(tf.initialize_all_variables())
         self.saver = tf.train.Saver()
 
@@ -299,11 +302,16 @@ class QBrainNet:
         -------
         :return: None
         """
-        
+
+        if variables is None:
+            trainer = self.trainer
+        else:
+            trainer = self.trainers[variables]
+
         for i in range(num_iterations):
             feed_dict = {self.x: x_, self.y_: y_}
 
-            self.trainer.run(session=self.sess, feed_dict=feed_dict)
+            trainer.run(session=self.sess, feed_dict=feed_dict)
             error = self.sess.run(self.errors, feed_dict=feed_dict) / float(len(y_) / self.num_actions)
             print('\t\tloss: ' + str(error))
             if error < max_error:
