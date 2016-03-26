@@ -108,7 +108,7 @@ class QBrain:
         """
         self.mem.put_experience(group_name, input_features, action, time)
 
-    def train(self, batch_size, num_iter, max_error):
+    def train(self, batch_size, num_iter, max_error, train_layer_name):
         """
         Train based on flushed groups experiences.
 
@@ -129,7 +129,7 @@ class QBrain:
             print("Batch was none!")
             return
         print('\ttrain')
-        self.net.train(batch[0], batch[1], num_iter, max_error, None)
+        self.net.train(batch[0], batch[1], num_iter, max_error, train_layer_name)
 
     def post_reward(self, group_name, reward, start_time, duration):
         """

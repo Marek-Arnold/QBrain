@@ -162,7 +162,11 @@ class TrainResource:
         if 'er' in body:
             max_error = float(body['er'])
 
-        brain.train(batch_size, num_iter, max_error)
+        train_layer_name = None
+        if 'tln' in body:
+            train_layer_name = str(body['tln'])
+
+        brain.train(batch_size, num_iter, max_error, train_layer_name)
 
 
 class RewardResource:

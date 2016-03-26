@@ -287,7 +287,7 @@ class QBrainNet:
         """
         return self.sess.run(self.predicted_action_values, feed_dict={self.x: x_})
 
-    def train(self, x_, y_, num_iterations, max_error, variables):
+    def train(self, x_, y_, num_iterations, max_error, train_layer_name):
         """
         Parameters
         ----------
@@ -303,10 +303,10 @@ class QBrainNet:
         :return: None
         """
 
-        if variables is None:
+        if train_layer_name is None:
             trainer = self.trainer
         else:
-            trainer = self.trainers[variables]
+            trainer = self.trainers[train_layer_name]
 
         for i in range(num_iterations):
             feed_dict = {self.x: x_, self.y_: y_}
