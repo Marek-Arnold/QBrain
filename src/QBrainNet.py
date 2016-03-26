@@ -268,7 +268,7 @@ class QBrainNet:
 
         self.errors = tf.reduce_sum(tf.abs((self.y_ - self.predicted_action_values) * self.y_))
 
-        self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors, var_list=[].extend(self.variables['fully_connected_net']))
+        self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors, var_list=self.variables['fully_connected_net'])
         self.sess.run(tf.initialize_all_variables())
         self.saver = tf.train.Saver()
 
