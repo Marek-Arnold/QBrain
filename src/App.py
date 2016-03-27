@@ -1,6 +1,5 @@
 import falcon
 import json
-import os
 from QBrain import QBrain
 
 num_input_wall_distance = 2 + 2 * 4
@@ -12,13 +11,13 @@ num_inputs = num_input_wall_distance + num_input_enemy + num_input_hit_by_bullet
 num_actions = 6
 temporal_window = 128
 single_input_size = num_inputs + num_actions
-sensor_descriptions = [(num_input_wall_distance, 1, [], [8, 16, 4], 'Walls'),
-                       (num_sensor_enemy, num_sensor_enemy_inputs, [8, 16, 4], [64, 128, 80], 'Spotted_Enemy'),
-                       (num_input_hit_by_bullet_damage, 1, [], [4, 8, 4], 'Hit_By_Bullet'),
-                       (1, num_actions, [8, 16, 4], [], 'Taken_Action')]
-num_neurons_in_convolution_layers = [128, 256, 64]
-num_neurons_in_convolution_layers_for_time = [96, 144, 216, 324]
-num_neurons_in_fully_connected_layers = [2056, 1024, 512, 256]
+sensor_descriptions = [(num_input_wall_distance, 1, [], [], 'Walls'),
+                       (num_sensor_enemy, num_sensor_enemy_inputs, [16], [128, 128], 'Spotted_Enemy'),
+                       (num_input_hit_by_bullet_damage, 1, [], [], 'Hit_By_Bullet'),
+                       (num_actions, 1, [], [], 'Taken_Action')]
+num_neurons_in_convolution_layers = [256, 256]
+num_neurons_in_convolution_layers_for_time = [384, 512, 768, 1024, 512]
+num_neurons_in_fully_connected_layers = [1024, 512, 256]
 
 brain = QBrain(single_input_size,
                temporal_window,
@@ -28,9 +27,7 @@ brain = QBrain(single_input_size,
                num_neurons_in_convolution_layers_for_time,
                num_neurons_in_fully_connected_layers)
 
-if os.path.exists('saves/'):
-    files = os.listdir('saves/')
-    brain.load('xx_autosave')
+brain.load('xx_autosave')
 
 
 class ForwardResource:
@@ -161,7 +158,15 @@ class TrainResource:
         if 'bs' in body:
             batch_size = int(body['bs'])
 
-        brain.train(batch_size, num_iter)
+        max_error = 1.0
+        if 'er' in body:
+            max_error = float(body['er'])
+
+        train_layer_name = None
+        if 'tln' in body:
+            train_layer_name = str(body['tln'])
+
+        brain.train(batch_size, num_iter, max_error, train_layer_name)
 
 
 class RewardResource:
@@ -236,3 +241,5 @@ api.add_route('/flush_group', FlushGroupResource())
 api.add_route('/save', SaveResource())
 api.add_route('/load', LoadResource())
 api.add_route('/test', TestResource())
+
+print('Ready..')

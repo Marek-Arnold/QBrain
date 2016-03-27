@@ -108,7 +108,7 @@ class QBrain:
         """
         self.mem.put_experience(group_name, input_features, action, time)
 
-    def train(self, batch_size, num_iter):
+    def train(self, batch_size, num_iter, max_error, train_layer_name):
         """
         Train based on flushed groups experiences.
 
@@ -129,7 +129,7 @@ class QBrain:
             print("Batch was none!")
             return
         print('\ttrain')
-        self.net.train(batch[0], batch[1], num_iter)
+        self.net.train(batch[0], batch[1], num_iter, max_error, train_layer_name)
 
     def post_reward(self, group_name, reward, start_time, duration):
         """
@@ -183,24 +183,11 @@ class QBrain:
         if not os.path.exists('saves/'):
             os.mkdir('saves/')
         self.mem.save('saves/', model_name, '.pkl')
-        self.net.save('saves/' + model_name + '.ckpt')
+        self.net.save_multi_file('saves/' + model_name, '.ckpt')
+        print('saved')
 
     def load(self, model_base_name):
-        self.net.load('saves/' + model_base_name + '.ckpt')
+        self.net.load_multi_file('saves/' + model_base_name, '.ckpt')
         self.mem.load('saves/', model_base_name, '.pkl')
+        print('loaded')
 
-    def load_single_file(self, model_name):
-        """
-        Load the model and the experience.
-
-        Parameters
-        ----------
-        :param model_name: str
-            The base name to use for files.
-
-        Returns
-        -------
-        :return: None
-        """
-        self.net.load('saves/' + model_name + '.ckpt')
-        self.mem.load_single_file('saves/' + model_name + '.pkl')
