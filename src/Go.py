@@ -15,10 +15,10 @@ class Go():
         self.is_finished = False
 
     def switch_next(self):
-        if self.next == Go.black:
-            self.next = Go.white
+        if self.next == Go.black_str:
+            self.next = Go.white_str
         else:
-            self.next = Go.black
+            self.next = Go.black_str
 
     def expert_move(self):
         if not self.is_finished:
