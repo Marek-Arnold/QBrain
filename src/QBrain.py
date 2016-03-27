@@ -184,8 +184,10 @@ class QBrain:
             os.mkdir('saves/')
         self.mem.save('saves/', model_name, '.pkl')
         self.net.save_multi_file('saves/' + model_name, '.ckpt')
+        print('saved')
 
     def load(self, model_base_name):
         self.net.load_multi_file('saves/' + model_base_name, '.ckpt')
         self.mem.load('saves/', model_base_name, '.pkl')
+        print('loaded')
 

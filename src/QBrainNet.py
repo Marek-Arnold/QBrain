@@ -321,6 +321,7 @@ class QBrainNet:
         for saver_name in self.savers:
             file_name = model_base_name + '_' + saver_name + extension
             print('saving:\t' + str(self.savers[saver_name].save(self.sess, file_name)))
+        print('saved net')
 
     def load_multi_file(self, model_base_name, extension):
         for saver_name in self.savers:
@@ -330,3 +331,4 @@ class QBrainNet:
                 print('restored:\t' + file_name)
             else:
                 print('not_found:\t' + file_name)
+        print('loaded net')
