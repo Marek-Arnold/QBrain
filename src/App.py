@@ -241,3 +241,5 @@ api.add_route('/flush_group', FlushGroupResource())
 api.add_route('/save', SaveResource())
 api.add_route('/load', LoadResource())
 api.add_route('/test', TestResource())
+
+print('Ready..')
