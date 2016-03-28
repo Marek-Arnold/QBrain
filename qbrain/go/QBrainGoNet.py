@@ -116,7 +116,7 @@ class QBrainGoNet:
                                                          [-1, self.board_size, self.board_size, 1]),
                                               self.possible_moves)
 
-        self.errors = tf.reduce_sum(tf.mul(tf.abs((self.y_ - self.predicted_action_values), self.y_)))
+        self.errors = tf.reduce_sum(tf.abs((self.y_ - self.predicted_action_values), self.y_))
 
         for var_name in self.variables:
             self.trainers[var_name] = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors,
