@@ -105,6 +105,3 @@ class Go():
 
     def show_board(self):
         return self.go.showboard()
-
-    def is_finished(self):
-        return self.is_finished
