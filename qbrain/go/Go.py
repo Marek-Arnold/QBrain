@@ -21,6 +21,7 @@ class Go():
     black_str = 'black'
     white_str = 'white'
     pass_str = 'pass'
+    resign_str = 'resign'
 
     board_size = 19
 
@@ -57,6 +58,9 @@ class Go():
                 else:
                     self.last_has_passed = True
                 return None, Go.pass_str
+            elif genmove == Go.resign_str:
+                self.finish_game()
+                return None, Go.resign_str
             else:
                 self.last_has_passed = False
                 x = Go.alpha_values[genmove[0].upper()]
