@@ -1,6 +1,6 @@
 import falcon
 import json
-from ..qbrain import QBrain
+from qbrain import QBrain
 
 num_input_wall_distance = 2 + 2 * 4
 num_sensor_enemy = 32
