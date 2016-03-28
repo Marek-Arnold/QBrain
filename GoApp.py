@@ -119,6 +119,16 @@ class GoApp():
             field = go.get_field_as_str()
             print_step(bw, expert_move, field)
         print_winner(go)
+        
+        if go.winner == Go.black_str:
+            self.brain.post_reward(black_group_name, go.score, 0, move_num_black)
+            self.brain.post_reward(white_group_name, -go.score, 0, move_num_white)
+        else:
+            self.brain.post_reward(black_group_name, -go.score, 0, move_num_black)
+            self.brain.post_reward(white_group_name, go.score, 0, move_num_white)
+
+        self.brain.flush_group(black_group_name)
+        self.brain.flush_group(white_group_name)
 
     def save(self, name='go_autosave'):
         self.brain.save(name)
