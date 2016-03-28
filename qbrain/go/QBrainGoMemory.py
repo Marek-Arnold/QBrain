@@ -127,7 +127,7 @@ class QBrainGoMemory:
         if len(self.flushed_experience_groups) == 0:
             return None
 
-        return self.get_batch_from_groups(batch_size, self.flushed_experience_groups)
+        return self.get_batch_from_groups(batch_size, self.flushed_experience_groups, self.num_actions)
 
     def save(self, path, base_name, extension):
         """
