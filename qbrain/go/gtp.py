@@ -38,6 +38,9 @@ class GoTextBase(object):
     def showboard(self):
         return self._send('showboard')
 
+    def final_score(self):
+        return self._send('final_score')
+
     def list_stones(self, color):
         return self._send('list_stones {0}'.format(color)).strip()
 
