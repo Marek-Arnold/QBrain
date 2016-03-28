@@ -1,7 +1,7 @@
 import os
 
 from qbrain.go.QBrainGoNet import QBrainGoNet
-from qbrain.core.QBrainMemory import QBrainMemory
+from qbrain.go.QBrainGoMemory import QBrainGoMemory
 
 
 class QBrainGo:
@@ -38,7 +38,7 @@ class QBrainGo:
             convolution_layers,
             fully_connected_layers)
 
-        self.mem = QBrainMemory(self.field_size, self.field_size + 1)
+        self.mem = QBrainGoMemory(self.field_size, self.field_size + 1)
 
     def forward(self, group_name, input_features, time, is_black):
         """
@@ -60,7 +60,7 @@ class QBrainGo:
             The index of the best action.
         """
         print('\tget_mem')
-        running_experience = self.mem.get_experiences_for_prediction(group_name, input_features, time, 0)
+        running_experience = input_features
 
         if not is_black:
             inverted_exp = [i * -1.0 for i in running_experience]
