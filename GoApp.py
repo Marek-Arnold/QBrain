@@ -23,6 +23,7 @@ def flatten_field(field):
 
     for i in range(len(field)):
         flat_field.extend(field[i])
+    return flat_field
 
 
 class GoApp():
