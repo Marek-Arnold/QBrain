@@ -1,6 +1,7 @@
-from qbrain import QBrainNet
-from qbrain import QBrainMemory
 import os
+
+from qbrain.core import QBrainNet
+from qbrain.core import QBrainMemory
 
 
 class QBrain:

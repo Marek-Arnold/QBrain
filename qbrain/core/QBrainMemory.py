@@ -1,10 +1,11 @@
-from qbrain import Experience
-from qbrain import ExperienceGroup
-from qbrain import Reward
 import random
 import os
 import os.path
 import pickle
+
+from qbrain.core import Experience
+from qbrain.core import ExperienceGroup
+from qbrain.core import Reward
 
 
 class QBrainMemory:
