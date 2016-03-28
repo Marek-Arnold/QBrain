@@ -105,15 +105,14 @@ class QBrainGoNet:
             self.savers['fully_connected_layer_' + str(fc_layer_num)] = tf.train.Saver(fully_connected_net_variables)
             self.variables['fully_connected_layer_' + str(fc_layer_num)] = fully_connected_net_variables
 
-        W_fc_last = weight_variable([fully_connected_layers[-1], self.field_size], "action_net")
-        b_fc_last = bias_variable([self.field_size], "action_net")
+        W_fc_last = weight_variable([fully_connected_layers[-1], self.field_size + 1], "action_net")
+        b_fc_last = bias_variable([self.field_size + 1], "action_net")
 
         action_net_variables = [W_fc_last, b_fc_last]
         self.savers['action_net'] = tf.train.Saver(action_net_variables)
         self.variables['action_net'] = action_net_variables
 
-        self.predicted_action_values = tf.mul(tf.reshape(tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_last), b_fc_last),
-                                                         [-1, self.board_size, self.board_size, 1]),
+        self.predicted_action_values = tf.mul(tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_last), b_fc_last),
                                               self.possible_moves)
 
         self.errors = tf.reduce_sum(tf.mul(tf.abs(tf.sub(self.y_, self.predicted_action_values), self.y_)))
