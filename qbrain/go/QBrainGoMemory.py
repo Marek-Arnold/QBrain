@@ -200,7 +200,7 @@ class QBrainGoMemory:
         batch_x = []
         batch_y = []
         for batch_num in range(0, batch_size):
-            group = random.choice(groups.values())
+            group = random.choice(list(groups.values()))
             ind = random.randint(group.first, group.last)
             experience = group.group[ind]
             batch_x.append(experience.input_features)
