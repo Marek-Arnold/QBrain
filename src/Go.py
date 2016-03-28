@@ -12,9 +12,14 @@ class Go():
     pass_str = 'pass'
 
     board_size = 9
+
     empty_field = 0
     black_field = 1
     white_field = -1
+
+    empty_field_char = ' '
+    black_field_char = 'X'
+    white_field_char = 'O'
 
     def __init__(self):
         self.go = gtp.GoTextPipe()
@@ -95,7 +100,14 @@ class Go():
         for y in range(len(field)):
             row = field[y]
             for x in range(len(row)):
-                field_str += str(row[x]) + ' '
+                if row[x] == Go.empty_field:
+                    char = Go.empty_field_char
+                elif row[x] == Go.black_field:
+                    char = Go.black_field_char
+                else:
+                    char = Go.white_field_char
+
+                field_str += char + ' '
             field_str += '\n'
         return field_str
 
