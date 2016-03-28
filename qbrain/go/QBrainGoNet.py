@@ -39,9 +39,9 @@ class QBrainGoNet:
         self.trainers = {}
 
         self.sess = tf.InteractiveSession()
-        self.x = tf.placeholder(tf.float32, shape=[None, self.field_size])
-        self.y_ = tf.placeholder(tf.float32, shape=[None, self.field_size + 1])
-        self.possible_moves = tf.placeholder(tf.float32, shape=[None, self.field_size + 1])
+        self.x = tf.placeholder(tf.float32, shape=[None, self.field_size], name='x')
+        self.y_ = tf.placeholder(tf.float32, shape=[None, self.field_size + 1], name='y')
+        self.possible_moves = tf.placeholder(tf.float32, shape=[None, self.field_size + 1], name='possible_moves')
 
         def weight_variable(shape, name):
             initial = tf.truncated_normal(shape, stddev=0.01)
