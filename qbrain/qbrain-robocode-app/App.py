@@ -1,7 +1,7 @@
 import json
 
 import falcon
-from qbrain.core import QBrain
+from ..core import QBrain
 
 
 num_input_wall_distance = 2 + 2 * 4
