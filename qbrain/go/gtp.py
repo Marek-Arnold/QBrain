@@ -2,6 +2,7 @@
 # Copyright (c) 2016
 # Distributed under the MIT license.
 
+import platform
 import socket
 import subprocess
 
@@ -81,7 +82,10 @@ class GoTextPipe(GoTextBase):
     Start a new instance of gnugo and communicate with it via stdin/stdout.
     """
     def __init__(self, board_size=9):
-        args = 'gnugo.exe --mode gtp --boardsize {0}'.format(board_size)
+        if platform.system().lower() == 'windows':
+            args = 'gnugo.exe --mode gtp --boardsize {0}'.format(board_size)
+        else:
+            args = 'gnugo --mode gtp --boardsize {0}'.format(board_size)
         self.gnugo = subprocess.Popen(args.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
     def _send(self, data):
