@@ -14,7 +14,7 @@ def map_fields_from_alpha_to_ind(points):
 
 
 class Go():
-    alpha_positions = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']
+    alpha_positions = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']
     alpha_values = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7, 'J': 8, 'K': 9, 'L': 10, 'M': 11,
                     'N': 12, 'O': 13, 'P': 14, 'Q': 15, 'R': 16, 'S': 17, 'T': 18}
 
@@ -160,7 +160,7 @@ class Go():
 
         for i in range(self.board_size):
             field[i] = [0.0] * self.board_size
-            
+
         for i in range(len(points)):
             p = points[i]
             field[p[1]][p[0]] = 1.0
