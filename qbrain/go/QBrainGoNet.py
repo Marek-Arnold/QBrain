@@ -130,7 +130,7 @@ class QBrainGoNet:
         self.sess.run(tf.initialize_all_variables())
         self.saver = tf.train.Saver()
 
-    def predict(self, x_):
+    def predict(self, x_, possible_moves):
         """
         Predict the q-values for the given input.
         Parameters
@@ -140,7 +140,7 @@ class QBrainGoNet:
         :return: list of float
             The predicted q-values for each action.
         """
-        return self.sess.run(self.predicted_action_values, feed_dict={self.x: x_})
+        return self.sess.run(self.predicted_action_values, feed_dict={self.x: x_, self.possible_moves: possible_moves})
 
     def train(self, x_, y_, num_iterations, max_error, train_layer_name):
         """

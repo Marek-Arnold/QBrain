@@ -40,7 +40,7 @@ class QBrainGo:
 
         self.mem = QBrainGoMemory(self.field_size, self.field_size + 1)
 
-    def forward(self, group_name, input_features, time, is_black):
+    def forward(self, group_name, input_features, possible_moves, time, is_black):
         """
         Predict the q-values for the given group and observation.
 
@@ -68,7 +68,7 @@ class QBrainGo:
 
         # print memExp
         print('\tpredict')
-        prediction = self.net.predict([running_experience])[0]
+        prediction = self.net.predict([running_experience], [possible_moves])[0]
         print(prediction)
         action = -1
         best_val = -100

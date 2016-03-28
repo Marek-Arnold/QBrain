@@ -48,10 +48,12 @@ class GoApp():
             field = go.get_field()
 
             if bw == Go.black_str:
-                net_move_ind = self.brain.forward(black_group_name, flatten_field(field), move_num_black, True)
+                net_move_ind = self.brain.forward(black_group_name, flatten_field(field), go.get_black_possible_moves(),
+                                                  move_num_black, True)
                 move_num_black += 1
             else:
-                net_move_ind = self.brain.forward(white_group_name, flatten_field(field), move_num_white, False)
+                net_move_ind = self.brain.forward(white_group_name, flatten_field(field), go.get_white_possible_moves(),
+                                                  move_num_white, False)
                 move_num_white += 1
 
             if net_move_ind == self.pass_move_ind:
