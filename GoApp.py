@@ -33,6 +33,7 @@ class GoApp():
         self.brain = QBrainGo(board_size, [(3, 4), (5, 8), (8, 8)], [4096, 2048])
         self.brain.load('go_autosave')
         self.mem_index = 0
+        self.mem_index_exp = 0
         print('Ready..')
 
     def net_only(self):
@@ -53,7 +54,6 @@ class GoApp():
                 pm = go.get_black_possible_moves()
                 possible_moves.extend(flatten_field(pm))
                 possible_moves.append(1.0)
-                print(possible_moves)
                 net_move_ind = self.brain.forward(black_group_name, flatten_field(field), possible_moves,
                                                   move_num_black, True)
                 move_num_black += 1
@@ -61,7 +61,6 @@ class GoApp():
                 possible_moves = []
                 possible_moves.extend(flatten_field(go.get_white_possible_moves()))
                 possible_moves.append(1.0)
-                print(possible_moves)
                 net_move_ind = self.brain.forward(white_group_name, flatten_field(field), possible_moves,
                                                   move_num_white, False)
                 move_num_white += 1
@@ -93,9 +92,34 @@ class GoApp():
 
     def expert_only(self):
         go = Go()
+
+        move_num_black = 0
+        move_num_white = 0
+
+        black_group_name = Go.black_str + '_exp_' + str(self.mem_index_exp)
+        white_group_name = Go.white_str + '_exp_' + str(self.mem_index_exp)
+        self.mem_index_exp += 1
+
         while not go.is_finished:
             bw = go.next
+            flat_field = flatten_field(go.get_field())
             expert_move = go.expert_move()
+
+            if expert_move[0] is None:
+                move_ind = self.pass_move_ind
+            else:
+                move_ind = expert_move[0][0] + expert_move[0][1] * self.board_size
+
+            if bw == Go.black_str:
+                self.brain.expert_forward(black_group_name, flat_field, move_ind, move_num_black)
+                move_num_black += 1
+            else:
+                self.brain.expert_forward(white_group_name, flat_field, move_ind, move_num_white)
+                move_num_white += 1
+
             field = go.get_field_as_str()
             print_step(bw, expert_move, field)
         print_winner(go)
+
+    def train(self, batch_size=1024, num_iter=10, max_err=0.0):
+        self.brain.train(batch_size, num_iter, max_err, None)

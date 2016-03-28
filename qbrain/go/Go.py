@@ -145,13 +145,11 @@ class Go():
 
     def get_black_possible_moves(self):
         legal_moves = self.legal_black_moves()
-        print(legal_moves)
         mapped_moves = map_fields_from_alpha_to_ind(legal_moves)
         return self.map_points_to_field(mapped_moves)
 
     def get_white_possible_moves(self):
         legal_moves = self.legal_white_moves()
-        print(legal_moves)
         mapped_moves = map_fields_from_alpha_to_ind(legal_moves)
         return self.map_points_to_field(mapped_moves)
 
