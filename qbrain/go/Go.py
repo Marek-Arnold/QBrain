@@ -161,7 +161,7 @@ class Go():
 
         for i in range(len(points)):
             p = points[i]
-            field[p[0]][p[1]] = 1.0
+            field[p[1]][p[0]] = 1.0
         return field
 
     def legal_white_moves(self):

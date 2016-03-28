@@ -71,11 +71,13 @@ class QBrainGo:
         prediction = self.net.predict([running_experience], [possible_moves])[0]
         # print(prediction)
         action = -1
-        best_val = -100
+        best_val = -1000000
         for i in range(0, self.field_size + 1):
-            if prediction[i] > best_val:
+            if prediction[i] > best_val and possible_moves[i] != 0:
                 action = i
                 best_val = prediction[i]
+        if action == -1:
+            action = self.field_size
         self.mem.put_experience(group_name, input_features, action, time)
         return action
 
