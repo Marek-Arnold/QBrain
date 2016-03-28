@@ -1,5 +1,5 @@
-from QBrainNet import QBrainNet
-from QBrainMemory import QBrainMemory
+from qbrain import QBrainNet
+from qbrain import QBrainMemory
 import os
 
 
@@ -44,7 +44,7 @@ class QBrain:
         self.temporal_window_size = temporal_window_size
         self.num_actions = num_actions
 
-        self.net = QBrainNet(single_input_size,
+        self.net = QBrainNet.QBrainNet(single_input_size,
                              temporal_window_size,
                              num_actions,
                              sensor_descriptions,
@@ -52,7 +52,7 @@ class QBrain:
                              num_neurons_in_convolution_layers_for_time,
                              num_neurons_in_fully_connected_layers)
 
-        self.mem = QBrainMemory(single_input_size, num_actions)
+        self.mem = QBrainMemory.QBrainMemory(single_input_size, num_actions)
 
     def forward(self, group_name, input_features, time):
         """

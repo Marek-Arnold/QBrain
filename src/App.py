@@ -1,6 +1,6 @@
 import falcon
 import json
-from QBrain import QBrain
+from qbrain import QBrain
 
 num_input_wall_distance = 2 + 2 * 4
 num_sensor_enemy = 32
@@ -19,13 +19,13 @@ num_neurons_in_convolution_layers = [256, 256]
 num_neurons_in_convolution_layers_for_time = [384, 512, 768, 1024, 512]
 num_neurons_in_fully_connected_layers = [1024, 512, 256]
 
-brain = QBrain(single_input_size,
-               temporal_window,
-               num_actions,
-               sensor_descriptions,
-               num_neurons_in_convolution_layers,
-               num_neurons_in_convolution_layers_for_time,
-               num_neurons_in_fully_connected_layers)
+brain = QBrain.QBrain(single_input_size,
+                      temporal_window,
+                      num_actions,
+                      sensor_descriptions,
+                      num_neurons_in_convolution_layers,
+                      num_neurons_in_convolution_layers_for_time,
+                      num_neurons_in_fully_connected_layers)
 
 brain.load('xx_autosave')
 
@@ -111,7 +111,6 @@ class ExpertForwardResource:
             array_with_num_inputs_numbers.append(e)
             array_with_num_inputs_numbers.append(h)
             array_with_num_inputs_numbers.append(v)
-
 
         for i in range(0, num_input_hit_by_bullet_damage):
             ind = 'da_' + str(i)
