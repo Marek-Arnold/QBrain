@@ -116,7 +116,7 @@ class QBrainGo:
         :return: None
         """
         print('\tget_batch')
-        batch = self.mem.get_batch(batch_size, 0)
+        batch = self.mem.get_batch(batch_size)
         if batch is None:
             print("Batch was none!")
             return

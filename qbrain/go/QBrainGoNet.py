@@ -114,6 +114,7 @@ class QBrainGoNet:
 
         self.predicted_action_values = tf.mul(tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_last), b_fc_last),
                                               self.possible_moves)
+        self.possible_predicted_action_values = tf.mul(self.predicted_action_values, self.possible_moves)
 
         self.errors = tf.reduce_sum(tf.mul(tf.abs(tf.sub(self.y_,
                                                          self.predicted_action_values,
@@ -140,7 +141,7 @@ class QBrainGoNet:
         :return: list of float
             The predicted q-values for each action.
         """
-        return self.sess.run(self.predicted_action_values, feed_dict={self.x: x_, self.possible_moves: possible_moves})
+        return self.sess.run(self.possible_predicted_action_values, feed_dict={self.x: x_, self.possible_moves: possible_moves})
 
     def train(self, x_, y_, num_iterations, max_error, train_layer_name):
         """
