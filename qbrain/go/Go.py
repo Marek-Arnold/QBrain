@@ -1,5 +1,5 @@
 __author__ = 'Marek'
-import gtp
+from qbrain.go.gtp import GoTextPipe
 
 
 class Go():
@@ -11,21 +11,23 @@ class Go():
     white_str = 'white'
     pass_str = 'pass'
 
-    board_size = 9
+    board_size = 19
 
     empty_field = 0
     black_field = 1
     white_field = -1
 
     empty_field_char = ' '
-    black_field_char = 'X'
+    black_field_char = '.'
     white_field_char = 'O'
 
     def __init__(self):
-        self.go = gtp.GoTextPipe()
+        self.go = GoTextPipe(board_size=Go.board_size)
         self.next = Go.black_str
         self.last_has_passed = False
         self.is_finished = False
+        self.winner = None
+        self.score = None
 
     def switch_next(self):
         if self.next == Go.black_str:
@@ -40,18 +42,22 @@ class Go():
 
             if genmove == Go.pass_str:
                 if self.last_has_passed:
-                    self.is_finished = True
+                    self.finish_game()
                 else:
                     self.last_has_passed = True
+                return None, Go.pass_str
             else:
                 self.last_has_passed = False
+                x = Go.alpha_values[genmove[0].upper()]
+                y = int(genmove[1:]) - 1
+                return (x, y), None
 
     def move_pass(self):
         if not self.is_finished:
             self.go.play(self.next, Go.pass_str)
             self.switch_next()
             if self.last_has_passed:
-                self.is_finished = True
+                self.finish_game()
             else:
                 self.last_has_passed = True
 
@@ -59,7 +65,22 @@ class Go():
         if not self.is_finished:
             position = Go.alpha_positions[x] + str((y + 1))
             self.go.play(self.next, position)
+            self.last_has_passed = False
             self.switch_next()
+
+    def finish_game(self):
+        if not self.is_finished:
+            self.is_finished = True
+            final_score = self.go.final_score()
+            winner = final_score[1]
+            score = float(final_score[2:])
+
+            if winner.upper() == 'W':
+                self.winner = Go.white_str
+            else:
+                self.winner = Go.black_str
+
+            self.score = score
 
     def get_black_stones(self):
         stones_str = self.go.list_stones(Go.black_str)
@@ -84,12 +105,12 @@ class Go():
 
         for stone in self.get_black_stones():
             x = Go.alpha_values[stone[0].upper()]
-            y = int(stone[1]) - 1
+            y = int(stone[1:]) - 1
             field[y][x] = Go.black_field
 
         for stone in self.get_white_stones():
             x = Go.alpha_values[stone[0].upper()]
-            y = int(stone[1]) - 1
+            y = int(stone[1:]) - 1
             field[y][x] = Go.white_field
 
         return field
