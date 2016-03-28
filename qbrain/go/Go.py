@@ -83,8 +83,10 @@ class Go():
         if not self.is_finished:
             self.is_finished = True
             final_score = self.go.final_score()
-            winner = final_score[1]
-            score = float(final_score[2:])
+            final_score = final_score.strip()
+            print(final_score)
+            winner = final_score[0]
+            score = float(final_score[1:])
 
             if winner.upper() == 'W':
                 self.winner = Go.white_str
