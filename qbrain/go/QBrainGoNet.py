@@ -115,7 +115,12 @@ class QBrainGoNet:
         self.predicted_action_values = tf.mul(tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_last), b_fc_last),
                                               self.possible_moves)
 
-        self.errors = tf.reduce_sum(tf.mul(tf.abs(tf.sub(self.y_, self.predicted_action_values), self.y_)))
+        self.errors = tf.reduce_sum(tf.mul(tf.abs(tf.sub(self.y_,
+                                                         self.predicted_action_values,
+                                                         name='calc_errors'),
+                                                  name='calc_absolute_errors'),
+                                           self.y_, name='dropout_unknown_errors'),
+                                    name='calc_sum_errors')
 
         for var_name in self.variables:
             self.trainers[var_name] = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors,
