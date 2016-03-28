@@ -52,6 +52,7 @@ class GoApp():
                 possible_moves = []
                 possible_moves.extend(flatten_field(go.get_black_possible_moves()))
                 possible_moves.append(1.0)
+                print(possible_moves)
                 net_move_ind = self.brain.forward(black_group_name, flatten_field(field), possible_moves,
                                                   move_num_black, True)
                 move_num_black += 1
@@ -70,6 +71,7 @@ class GoApp():
                 x = net_move_ind % self.board_size
                 y = net_move_ind / self.board_size
                 net_move = ((x, y), None)
+                print(net_move)
                 go.move(x, y)
 
             field_str = go.get_field_as_str()

@@ -69,7 +69,7 @@ class QBrainGo:
         # print memExp
         print('\tpredict')
         prediction = self.net.predict([running_experience], [possible_moves])[0]
-        print(prediction)
+        # print(prediction)
         action = -1
         best_val = -100
         for i in range(0, self.field_size + 1):
