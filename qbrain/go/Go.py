@@ -144,10 +144,16 @@ class Go():
         return field_str
 
     def get_black_possible_moves(self):
-        return self.map_points_to_field(map_fields_from_alpha_to_ind(self.legal_black_moves()))
+        legal_moves = self.legal_black_moves()
+        print(legal_moves)
+        mapped_moves = map_fields_from_alpha_to_ind(legal_moves)
+        return self.map_points_to_field(mapped_moves)
 
     def get_white_possible_moves(self):
-        return self.map_points_to_field(map_fields_from_alpha_to_ind(self.legal_white_moves()))
+        legal_moves = self.legal_white_moves()
+        print(legal_moves)
+        mapped_moves = map_fields_from_alpha_to_ind(legal_moves)
+        return self.map_points_to_field(mapped_moves)
 
     def map_points_to_field(self, points):
         field = [[0.0] * self.board_size] * self.board_size
