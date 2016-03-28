@@ -119,7 +119,7 @@ class QBrainGoNet:
                                                          self.predicted_action_values,
                                                          name='calc_errors'),
                                                   name='calc_absolute_errors'),
-                                           self.y_, name='dropout_unknown_errors'),
+                                           tf.abs(tf.ceil(self.y_)), name='dropout_unknown_errors'),
                                     name='calc_sum_errors')
 
         for var_name in self.variables:
