@@ -88,7 +88,6 @@ class GoApp():
 
         self.brain.flush_group(black_group_name)
         self.brain.flush_group(white_group_name)
-        self.brain.save('go_autosave')
 
     def expert_only(self):
         go = Go()
@@ -121,5 +120,17 @@ class GoApp():
             print_step(bw, expert_move, field)
         print_winner(go)
 
+    def save(self, name='go_autosave'):
+        self.brain.save(name)
+
+    def load(self, name='go_autosave'):
+        self.brain.load(name)
+
     def train(self, batch_size=1024, num_iter=10, max_err=0.0):
         self.brain.train(batch_size, num_iter, max_err, None)
+
+    def play_and_train(self, num_iter=10):
+        for i in range(num_iter):
+            self.net_only()
+            self.train()
+        self.save()
