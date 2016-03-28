@@ -164,7 +164,9 @@ class Go():
 
     def legal_black_moves(self):
         legal_moves_str = self.go.legal_moves(Go.black_str)
+        print(legal_moves_str)
         legal_moves = legal_moves_str.split(' ')
+        print(legal_moves)
         return legal_moves
 
     def show_board(self):
