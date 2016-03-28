@@ -8,6 +8,6 @@ class GoApp():
 
     def expert_only(self):
         go = Go()
-        while(not go.is_finished):
+        while not go.is_finished():
             go.expert_move()
-            print(go.show_board())
+            print(go.get_field_as_str())
