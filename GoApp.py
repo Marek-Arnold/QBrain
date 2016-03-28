@@ -50,14 +50,14 @@ class GoApp():
 
             if bw == Go.black_str:
                 possible_moves = []
-                possible_moves.extend(go.get_black_possible_moves())
+                possible_moves.extend(flatten_field(go.get_black_possible_moves()))
                 possible_moves.append(1.0)
                 net_move_ind = self.brain.forward(black_group_name, flatten_field(field), possible_moves,
                                                   move_num_black, True)
                 move_num_black += 1
             else:
                 possible_moves = []
-                possible_moves.extend(go.get_white_possible_moves())
+                possible_moves.extend(flatten_field(go.get_white_possible_moves()))
                 possible_moves.append(1.0)
                 net_move_ind = self.brain.forward(white_group_name, flatten_field(field), possible_moves,
                                                   move_num_white, False)
