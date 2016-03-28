@@ -58,12 +58,18 @@ class Go():
 
     def get_black_stones(self):
         stones_str = self.go.list_stones(Go.black_str)
-        stones = stones_str.split(' ')
+        if stones_str == '':
+            stones = []
+        else:
+            stones = stones_str.split(' ')
         return stones
 
     def get_white_stones(self):
         stones_str = self.go.list_stones(Go.white_str)
-        stones = stones_str.split(' ')
+        if stones_str == '':
+            stones = []
+        else:
+            stones = stones_str.split(' ')
         return stones
 
     def get_field(self):
