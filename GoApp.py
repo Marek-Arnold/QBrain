@@ -86,9 +86,3 @@ class GoApp():
             field = go.get_field_as_str()
             print_step(bw, expert_move, field)
         print_winner(go)
-
-
-g = GoApp()
-while True:
-    g.expert_only()
-    input("Press Enter to continue...")
