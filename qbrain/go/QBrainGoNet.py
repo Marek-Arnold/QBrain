@@ -64,7 +64,7 @@ class QBrainGoNet:
                 input_channels = 1
                 input_data = reshaped_x
             else:
-                input_channels = convolution_layers[conv_layer_num - 1][0]
+                input_channels = convolution_layers[conv_layer_num - 1][1]
                 input_data = h_conv[conv_layer_num - 1]
             output_channels = conv_layer[1]
 
