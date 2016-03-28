@@ -8,9 +8,9 @@ def map_fields_from_alpha_to_ind(points):
         p = points[i]
         x = Go.alpha_values[p[0].upper()]
         y = int(p[1:]) - 1
-        print(str(p) + ' --> (' + str(x) + ', ' + str(y) + ')')
+        # print(str(p) + ' --> (' + str(x) + ', ' + str(y) + ')')
         mapped.append((x, y))
-        return mapped
+    return mapped
 
 
 class Go():
@@ -164,9 +164,7 @@ class Go():
 
     def legal_black_moves(self):
         legal_moves_str = self.go.legal_moves(Go.black_str)
-        print(legal_moves_str)
         legal_moves = legal_moves_str.split(' ')
-        print(legal_moves)
         return legal_moves
 
     def show_board(self):
