@@ -156,8 +156,11 @@ class Go():
         return self.map_points_to_field(mapped_moves)
 
     def map_points_to_field(self, points):
-        field = [[0.0] * self.board_size] * self.board_size
+        field = [None] * self.board_size
 
+        for i in range(self.board_size):
+            field[i] = [0.0] * self.board_size
+            
         for i in range(len(points)):
             p = points[i]
             field[p[1]][p[0]] = 1.0
