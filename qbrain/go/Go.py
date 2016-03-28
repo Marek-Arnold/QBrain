@@ -6,7 +6,7 @@ def map_fields_from_alpha_to_ind(points):
     mapped = []
     for i in range(len(points)):
         p = points[i]
-        x = Go.alpha_values[p[0]]
+        x = Go.alpha_values[p[0].upper()]
         y = int(p[1:]) - 1
         mapped.append((x, y))
         return mapped
