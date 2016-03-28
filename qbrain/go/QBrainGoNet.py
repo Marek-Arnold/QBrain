@@ -112,8 +112,7 @@ class QBrainGoNet:
         self.savers['action_net'] = tf.train.Saver(action_net_variables)
         self.variables['action_net'] = action_net_variables
 
-        self.predicted_action_values = tf.mul(tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_last), b_fc_last),
-                                              self.possible_moves)
+        self.predicted_action_values = tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_last), b_fc_last)
         self.possible_predicted_action_values = tf.mul(self.predicted_action_values, self.possible_moves)
 
         self.errors = tf.reduce_sum(tf.mul(tf.abs(tf.sub(self.y_,
