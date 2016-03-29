@@ -125,7 +125,7 @@ class QBrainGoNet:
         self.savers['upper_bound_net'] = tf.train.Saver(upper_bound_net_variables)
         self.variables['upper_bound_net'] = upper_bound_net_variables
 
-        y_mul = tf.minimum(tf.ceil(tf.abs(self.y), self.constant_one))
+        y_mul = tf.minimum(tf.ceil(tf.abs(self.y)), self.constant_one)
 
         self.upper_bound_predicted_action_values = tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_upper_bound),
                                                                   b_fc_upper_bound)
