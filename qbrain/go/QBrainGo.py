@@ -94,7 +94,7 @@ class QBrainGo:
         self.mem.put_experience(group_name, input_features, action, time)
         return action, predicted_lower_bounds[action], predicted_upper_bounds[action]
 
-    def expert_forward(self, group_name, input_features, action, time):
+    def expert_forward(self, group_name, input_features, action, time, is_black):
         """
         Feed an expert decision into the observations.
 
@@ -113,6 +113,9 @@ class QBrainGo:
         -------
         :return: None
         """
+        if not is_black:
+            inverted_exp = [i * -1.0 for i in input_features]
+            input_features = inverted_exp
         self.mem.put_experience(group_name, input_features, action, time)
 
     def train(self, batch_size, num_iter, max_error, train_layer_name):
