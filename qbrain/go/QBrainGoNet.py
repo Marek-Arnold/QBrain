@@ -43,11 +43,11 @@ class QBrainGoNet:
         self.y = tf.placeholder(tf.float32, shape=[None, self.field_size + 1], name='y')
         self.possible_moves = tf.placeholder(tf.float32, shape=[None, self.field_size + 1], name='possible_moves')
 
-        self.constant_one = tf.constant(tf.float32, [1.0])
-        self.constant_zero = tf.constant(tf.float32, [0.0])
+        self.constant_one = tf.constant(1.0)
+        self.constant_zero = tf.constant(0.0)
 
-        self.constant_error_multiplier = tf.constant(tf.float32, [2.0])
-        self.constant_error_power = tf.constant(tf.float32, [2.0])
+        self.constant_error_multiplier = tf.constant(2.0)
+        self.constant_error_power = tf.constant(2.0)
 
         def weight_variable(shape, name):
             initial = tf.truncated_normal(shape, stddev=0.01)
@@ -208,7 +208,7 @@ class QBrainGoNet:
 
             trainer.run(session=self.sess, feed_dict=feed_dict)
             errors = self.sess.run(self.errors, feed_dict=feed_dict) / float(len(y_) / self.field_size)
-            print('\t\terrors ' + 
+            print('\t\terrors ' +
                   '\tlower: ' + str(errors[0]) +
                   '\tupper: ' + str(errors[1]) +
                   '\ttotal: ' + str(errors[0] + errors[1]))
