@@ -131,10 +131,10 @@ class QBrainGoNet:
                                                                   b_fc_upper_bound)
         self.upper_bound_possible_predicted_action_values = tf.mul(self.upper_bound_predicted_action_values,
                                                                    self.possible_moves)
-        self.upper_bound_errors_too_large = tf.minimum(self.constant_zero,
+        self.upper_bound_errors_too_large = tf.maximum(self.constant_zero,
                                                        tf.mul(tf.sub(self.upper_bound_predicted_action_values, self.y),
                                                               y_mul))
-        self.upper_bound_errors_too_small = tf.minimum(self.constant_zero,
+        self.upper_bound_errors_too_small = tf.maximum(self.constant_zero,
                                                        tf.mul(tf.sub(self.y, self.upper_bound_predicted_action_values),
                                                               y_mul))
         self.upper_bound_errors = tf.add(self.upper_bound_errors_too_large,
@@ -147,10 +147,10 @@ class QBrainGoNet:
                                                                   b_fc_lower_bound)
         self.lower_bound_possible_predicted_action_values = tf.mul(self.lower_bound_predicted_action_values,
                                                                    self.possible_moves)
-        self.lower_bound_errors_too_large = tf.minimum(self.constant_zero,
+        self.lower_bound_errors_too_large = tf.maximum(self.constant_zero,
                                                        tf.mul(tf.sub(self.lower_bound_predicted_action_values, self.y),
                                                               y_mul))
-        self.lower_bound_errors_too_small = tf.minimum(self.constant_zero,
+        self.lower_bound_errors_too_small = tf.maximum(self.constant_zero,
                                                        tf.mul(tf.sub(self.y, self.lower_bound_predicted_action_values),
                                                               y_mul))
         self.lower_bound_errors = tf.add(self.lower_bound_errors_too_small,
@@ -159,7 +159,7 @@ class QBrainGoNet:
                                                 self.constant_error_power))
         self.lower_bound_error = tf.reduce_sum(self.lower_bound_errors)
 
-        self.errors = tf.concat(0, self.lower_bound_error, self.upper_bound_error)
+        self.errors = tf.concat(0, [self.lower_bound_error, self.upper_bound_error])
         self.error = tf.add(self.lower_bound_error, self.upper_bound_error)
         self.predicted_lower_and_upper_bounds = tf.concat(1,
                                                           self.lower_bound_possible_predicted_action_values,
