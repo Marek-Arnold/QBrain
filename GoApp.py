@@ -37,7 +37,7 @@ class GoApp():
     def __init__(self, board_size=19):
         self.board_size = board_size
         self.pass_move_ind = board_size * board_size
-        self.brain = QBrainGo(board_size, [(3, 4), (5, 8), (8, 8)], [4096, 2048])
+        self.brain = QBrainGo(board_size, [(3, 8), (5, 12), (8, 16)], [4096, 2048])
         self.brain.load('go_autosave')
         millis = int(round(time.time() * 1000))
         self.mem_index = millis
