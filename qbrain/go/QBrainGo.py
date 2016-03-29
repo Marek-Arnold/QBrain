@@ -68,18 +68,31 @@ class QBrainGo:
 
         # print memExp
         print('\tpredict')
-        prediction = self.net.predict([running_experience], [possible_moves])[0]
+        predicted_lower_bounds, predicted_upper_bounds = self.net.predict([running_experience], [possible_moves])[0]
         # print(prediction)
-        action = -1
-        best_val = -1000000
+
+        lower_bound_action = -1
+        lower_bound_best_val = -1000000
         for i in range(0, self.field_size + 1):
-            if prediction[i] > best_val and possible_moves[i] != 0:
-                action = i
-                best_val = prediction[i]
-        if action == -1:
+            if (lower_bound_action == -1 or predicted_lower_bounds[i] > lower_bound_best_val) and possible_moves[i] != 0:
+                lower_bound_action = i
+                lower_bound_best_val = predicted_lower_bounds[i]
+
+        if lower_bound_action == -1:
             action = self.field_size
+        elif lower_bound_best_val < 0:
+            upper_bound_action = -1
+            upper_bound_best_val = -1000000
+            for i in range(0, self.field_size + 1):
+                if (upper_bound_action == -1 or predicted_upper_bounds[i] > upper_bound_best_val) and possible_moves[i] != 0:
+                    upper_bound_action = i
+                    upper_bound_best_val = predicted_upper_bounds[i]
+            action = upper_bound_action
+        else:
+            action = lower_bound_action
+
         self.mem.put_experience(group_name, input_features, action, time)
-        return action
+        return action, predicted_lower_bounds[action], predicted_upper_bounds[action]
 
     def expert_forward(self, group_name, input_features, action, time):
         """

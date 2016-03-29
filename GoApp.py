@@ -10,8 +10,8 @@ def print_winner(go):
     print()
 
 
-def print_step(bw, move, field):
-    print(bw + str(move))
+def print_step(bw, move, field, predicted_lower_bound, predicted_upper_bound):
+    print(bw + ': ' + str(move) + '\tlower: ' + str(predicted_lower_bound) + '\tupper: ' + str(predicted_upper_bound))
     print()
     print(field)
     print('-' * 20)
@@ -54,15 +54,21 @@ class GoApp():
                 pm = go.get_black_possible_moves()
                 possible_moves.extend(flatten_field(pm))
                 possible_moves.append(1.0)
-                net_move_ind = self.brain.forward(black_group_name, flatten_field(field), possible_moves,
-                                                  move_num_black, True)
+                net_move_ind, predicted_lower_bound, predicted_upper_bound = self.brain.forward(black_group_name,
+                                                                                                flatten_field(field),
+                                                                                                possible_moves,
+                                                                                                move_num_black,
+                                                                                                True)
                 move_num_black += 1
             else:
                 possible_moves = []
                 possible_moves.extend(flatten_field(go.get_white_possible_moves()))
                 possible_moves.append(1.0)
-                net_move_ind = self.brain.forward(white_group_name, flatten_field(field), possible_moves,
-                                                  move_num_white, False)
+                net_move_ind, predicted_lower_bound, predicted_upper_bound = self.brain.forward(white_group_name,
+                                                                                                flatten_field(field),
+                                                                                                possible_moves,
+                                                                                                move_num_white,
+                                                                                                False)
                 move_num_white += 1
 
             if net_move_ind == self.pass_move_ind:
@@ -72,11 +78,10 @@ class GoApp():
                 x = net_move_ind % self.board_size
                 y = int(net_move_ind / self.board_size)
                 net_move = ((x, y), None)
-                print(net_move)
                 go.move(x, y)
 
             field_str = go.get_field_as_str()
-            print_step(bw, net_move, field_str)
+            print_step(bw, net_move, field_str, predicted_lower_bound, predicted_upper_bound)
         print_winner(go)
 
         if go.winner == Go.black_str:
@@ -117,7 +122,7 @@ class GoApp():
                 move_num_white += 1
 
             field = go.get_field_as_str()
-            print_step(bw, expert_move, field)
+            print_step(bw, expert_move, field, 0, 0)
         print_winner(go)
 
         if go.winner == Go.black_str:

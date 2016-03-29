@@ -40,8 +40,14 @@ class QBrainGoNet:
 
         self.sess = tf.InteractiveSession()
         self.x = tf.placeholder(tf.float32, shape=[None, self.field_size], name='x')
-        self.y_ = tf.placeholder(tf.float32, shape=[None, self.field_size + 1], name='y')
+        self.y = tf.placeholder(tf.float32, shape=[None, self.field_size + 1], name='y')
         self.possible_moves = tf.placeholder(tf.float32, shape=[None, self.field_size + 1], name='possible_moves')
+
+        self.constant_one = tf.constant(tf.float32, [1.0])
+        self.constant_zero = tf.constant(tf.float32, [0.0])
+
+        self.constant_error_multiplier = tf.constant(tf.float32, [2.0])
+        self.constant_error_power = tf.constant(tf.float32, [2.0])
 
         def weight_variable(shape, name):
             initial = tf.truncated_normal(shape, stddev=0.01)
@@ -105,42 +111,76 @@ class QBrainGoNet:
             self.savers['fully_connected_layer_' + str(fc_layer_num)] = tf.train.Saver(fully_connected_net_variables)
             self.variables['fully_connected_layer_' + str(fc_layer_num)] = fully_connected_net_variables
 
-        W_fc_last = weight_variable([fully_connected_layers[-1], self.field_size + 1], "action_net")
-        b_fc_last = bias_variable([self.field_size + 1], "action_net")
+        W_fc_upper_bound = weight_variable([fully_connected_layers[-1], self.field_size + 1], "upper_bound_net")
+        b_fc_upper_bound = bias_variable([self.field_size + 1], "upper_bound_net")
 
-        action_net_variables = [W_fc_last, b_fc_last]
-        self.savers['action_net'] = tf.train.Saver(action_net_variables)
-        self.variables['action_net'] = action_net_variables
+        W_fc_lower_bound = weight_variable([fully_connected_layers[-1], self.field_size + 1], "lower_bound_net")
+        b_fc_lower_bound = bias_variable([self.field_size + 1], "lower_bound_net")
 
-        self.predicted_action_values = tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_last), b_fc_last)
-        self.possible_predicted_action_values = tf.mul(self.predicted_action_values, self.possible_moves)
+        lower_bound_net_variables = [W_fc_lower_bound, b_fc_lower_bound]
+        self.savers['lower_bound_net'] = tf.train.Saver(lower_bound_net_variables)
+        self.variables['lower_bound_net'] = lower_bound_net_variables
 
-        self.errors = tf.reduce_sum(tf.mul(tf.abs(tf.sub(self.y_,
-                                                         self.predicted_action_values,
-                                                         name='calc_errors'),
-                                                  name='calc_absolute_errors'),
-                                           tf.ceil(tf.abs(self.y_)), name='dropout_unknown_errors'),
-                                    name='calc_sum_errors')
+        upper_bound_net_variables = [W_fc_upper_bound, b_fc_upper_bound]
+        self.savers['upper_bound_net'] = tf.train.Saver(upper_bound_net_variables)
+        self.variables['upper_bound_net'] = upper_bound_net_variables
+
+        y_mul = tf.minimum(tf.ceil(tf.abs(self.y), self.constant_one))
+
+        self.upper_bound_predicted_action_values = tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_upper_bound),
+                                                                  b_fc_upper_bound)
+        self.upper_bound_possible_predicted_action_values = tf.mul(self.upper_bound_predicted_action_values,
+                                                                   self.possible_moves)
+        self.upper_bound_errors_too_large = tf.minimum(self.constant_zero,
+                                                       tf.mul(tf.sub(self.upper_bound_predicted_action_values, self.y),
+                                                              y_mul))
+        self.upper_bound_errors_too_small = tf.minimum(self.constant_zero,
+                                                       tf.mul(tf.sub(self.y, self.upper_bound_predicted_action_values),
+                                                              y_mul))
+        self.upper_bound_errors = tf.add(self.upper_bound_errors_too_large,
+                                         tf.pow(tf.mul(self.upper_bound_errors_too_small,
+                                                       self.constant_error_multiplier),
+                                                self.constant_error_power))
+        self.upper_bound_error = tf.reduce_sum(self.upper_bound_errors)
+
+        self.lower_bound_predicted_action_values = tf.nn.bias_add(tf.matmul(h_fc[-1], W_fc_lower_bound),
+                                                                  b_fc_lower_bound)
+        self.lower_bound_possible_predicted_action_values = tf.mul(self.lower_bound_predicted_action_values,
+                                                                   self.possible_moves)
+        self.lower_bound_errors_too_large = tf.minimum(self.constant_zero,
+                                                       tf.mul(tf.sub(self.lower_bound_predicted_action_values, self.y),
+                                                              y_mul))
+        self.lower_bound_errors_too_small = tf.minimum(self.constant_zero,
+                                                       tf.mul(tf.sub(self.y, self.lower_bound_predicted_action_values),
+                                                              y_mul))
+        self.lower_bound_errors = tf.add(self.lower_bound_errors_too_small,
+                                         tf.pow(tf.mul(self.lower_bound_errors_too_large,
+                                                       self.constant_error_multiplier),
+                                                self.constant_error_power))
+        self.lower_bound_error = tf.reduce_sum(self.lower_bound_errors)
+
+        self.errors = tf.concat(0, self.lower_bound_error, self.upper_bound_error)
+        self.error = tf.add(self.lower_bound_error, self.upper_bound_error)
+        self.predicted_lower_and_upper_bounds = tf.concat(1,
+                                                          self.lower_bound_possible_predicted_action_values,
+                                                          self.upper_bound_possible_predicted_action_values)
 
         for var_name in self.variables:
-            self.trainers[var_name] = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors,
+            self.trainers[var_name] = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.error,
                                                                                           var_list=self.variables[
                                                                                               var_name])
-        self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.errors)
+        self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.error)
         self.sess.run(tf.initialize_all_variables())
         self.saver = tf.train.Saver()
 
     def predict(self, x_, possible_moves):
-        """
-        Predict the q-values for the given input.
-        Parameters
-        ----------
-        :param x_: list of float
-            A series of observations.
-        :return: list of float
-            The predicted q-values for each action.
-        """
-        return self.sess.run(self.possible_predicted_action_values, feed_dict={self.x: x_, self.possible_moves: possible_moves})
+        bounds = self.sess.run(self.predicted_lower_and_upper_bounds,
+                               feed_dict={self.x: x_, self.possible_moves: possible_moves})
+
+        lower_bounds = bounds[:self.field_size + 1]
+        upper_bounds = bounds[self.field_size + 1:]
+
+        return lower_bounds, upper_bounds
 
     def train(self, x_, y_, num_iterations, max_error, train_layer_name):
         """
@@ -164,12 +204,15 @@ class QBrainGoNet:
             trainer = self.trainers[train_layer_name]
 
         for i in range(num_iterations):
-            feed_dict = {self.x: x_, self.y_: y_}
+            feed_dict = {self.x: x_, self.y: y_}
 
             trainer.run(session=self.sess, feed_dict=feed_dict)
-            error = self.sess.run(self.errors, feed_dict=feed_dict) / float(len(y_) / self.field_size)
-            print('\t\tloss: ' + str(error))
-            if error < max_error:
+            errors = self.sess.run(self.errors, feed_dict=feed_dict) / float(len(y_) / self.field_size)
+            print('\t\terrors ' + 
+                  '\tlower: ' + str(errors[0]) +
+                  '\tupper: ' + str(errors[1]) +
+                  '\ttotal: ' + str(errors[0] + errors[1]))
+            if errors[0] + errors[1] < max_error:
                 break
 
     def save_multi_file(self, model_base_name, extension):
