@@ -163,7 +163,7 @@ class GoApp():
 
     def play_net_and_train(self, num_cycle=100, batch_size=8192, num_iter=4, num_batches=8):
         for i in range(num_cycle):
-            self.play(is_black_gnugo=True, is_white_gnugo=True)
+            self.play(is_black_gnugo=False, is_white_gnugo=False)
             for batch_num in range(num_batches):
                 self.train(batch_size=batch_size, num_iter=num_iter)
         self.save()
