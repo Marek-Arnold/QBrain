@@ -1,5 +1,6 @@
 __author__ = 'Marek'
 import time
+import qbrain.util.timed_input as ti
 from qbrain.go.Go import Go
 from qbrain.go.QBrainGo import QBrainGo
 
@@ -31,6 +32,12 @@ def flatten_field(field):
     for i in range(len(field)):
         flat_field.extend(field[i])
     return flat_field
+
+
+def maybe_pause():
+    ans = ti.timed_unix_input('Continue in 5 seconds, press enter to pause', 5)
+    if ans is not None:
+        input('press enter to continue..')
 
 
 class GoApp():
@@ -154,9 +161,13 @@ class GoApp():
     def play_and_train(self, num_cycle=10, batch_size=6144, num_iter=2, num_batches=2):
         for i in range(num_cycle):
             self.play(is_black_gnugo=True, is_white_gnugo=False)
+            maybe_pause()
             self.play(is_black_gnugo=True, is_white_gnugo=True)
+            maybe_pause()
             self.play(is_black_gnugo=False, is_white_gnugo=True)
+            maybe_pause()
             self.play(is_black_gnugo=False, is_white_gnugo=False)
+            maybe_pause()
             for batch_num in range(num_batches):
                 self.train(batch_size=batch_size, num_iter=num_iter)
         self.save()
@@ -164,6 +175,7 @@ class GoApp():
     def play_net_and_train(self, num_cycle=100, batch_size=6144, num_iter=4, num_batches=8):
         for i in range(num_cycle):
             self.play(is_black_gnugo=False, is_white_gnugo=False)
+            maybe_pause()
             for batch_num in range(num_batches):
                 self.train(batch_size=batch_size, num_iter=num_iter)
         self.save()
