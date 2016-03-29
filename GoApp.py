@@ -40,6 +40,24 @@ def maybe_pause():
         input('press enter to continue..')
 
 
+def white_stones_lost(previous_field, field):
+    res = []
+    for y in range(len(previous_field)):
+        for x in range(len(previous_field[y])):
+            if previous_field[y][x] == Go.white_field and field[y][x] != Go.white_field:
+                res.append((x, y))
+    return res
+
+
+def black_stones_lost(previous_field, field):
+    res = []
+    for y in range(len(previous_field)):
+        for x in range(len(previous_field[y])):
+            if previous_field[y][x] == Go.black_field and field[y][x] != Go.black_field:
+                res.append((x, y))
+    return res
+
+
 class GoApp():
     def __init__(self, board_size=19):
         self.board_size = board_size
@@ -89,6 +107,10 @@ class GoApp():
 
     def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=400):
         go = Go()
+
+        last_field_of_stones = go.get_field()
+        stones_placed_at_move_field = go.get_field()
+
         move_num_black = 0
         move_num_white = 0
 
@@ -119,6 +141,8 @@ class GoApp():
                 else:
                     is_gnugo = False
                     move, predicted_lower_bound, predicted_upper_bound = self.play_net_move(go, black_group_name, field, move_num_black, True)
+
+                stones_placed_at_move_field[move[1]][move[0]] = move_num_black
                 move_num_black += 1
             else:
                 if is_white_gnugo:
@@ -127,7 +151,24 @@ class GoApp():
                 else:
                     is_gnugo = False
                     move, predicted_lower_bound, predicted_upper_bound = self.play_net_move(go, white_group_name, field, move_num_white, False)
+
+                stones_placed_at_move_field[move[1]][move[0]] = move_num_white
                 move_num_white += 1
+
+            now_field = go.get_field()
+            white_lost = white_stones_lost(last_field_of_stones, now_field)
+            black_lost = black_stones_lost(last_field_of_stones, now_field)
+            last_field_of_stones = now_field
+
+            for i in range(len(white_lost)):
+                placed_stone_at = stones_placed_at_move_field[white_lost[i][1]][white_lost[i][0]]
+                self.brain.post_reward(white_group_name, -1.0, placed_stone_at, move_num_white - placed_stone_at)
+                self.brain.post_reward(black_group_name, 1.0, placed_stone_at, move_num_black - placed_stone_at)
+
+            for i in range(len(black_lost)):
+                placed_stone_at = stones_placed_at_move_field[black_lost[i][1]][black_lost[i][0]]
+                self.brain.post_reward(black_group_name, -1.0, placed_stone_at, move_num_black - placed_stone_at)
+                self.brain.post_reward(white_group_name, 1.0, placed_stone_at, move_num_white - placed_stone_at)
 
             field_str = go.get_field_as_str()
             print_step(bw, is_gnugo, move, field_str, predicted_lower_bound, predicted_upper_bound)
