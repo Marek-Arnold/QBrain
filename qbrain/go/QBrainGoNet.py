@@ -162,8 +162,8 @@ class QBrainGoNet:
         self.errors = tf.concat(0, [tf.reshape(self.lower_bound_error, [1]), tf.reshape(self.upper_bound_error, [1])])
         self.error = tf.add(self.lower_bound_error, self.upper_bound_error)
         self.predicted_lower_and_upper_bounds = tf.concat(1,
-                                                          self.lower_bound_possible_predicted_action_values,
-                                                          self.upper_bound_possible_predicted_action_values)
+                                                          [self.lower_bound_possible_predicted_action_values,
+                                                          self.upper_bound_possible_predicted_action_values])
 
         for var_name in self.variables:
             self.trainers[var_name] = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.error,
