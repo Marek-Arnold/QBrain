@@ -177,8 +177,8 @@ class QBrainGoNet:
         bounds = self.sess.run(self.predicted_lower_and_upper_bounds,
                                feed_dict={self.x: x_, self.possible_moves: possible_moves})
 
-        lower_bounds = bounds[:self.field_size + 1]
-        upper_bounds = bounds[self.field_size + 1:]
+        lower_bounds = bounds[0][:self.field_size + 1]
+        upper_bounds = bounds[0][self.field_size + 1:]
 
         return lower_bounds, upper_bounds
 

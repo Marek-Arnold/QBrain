@@ -69,10 +69,6 @@ class QBrainGo:
         # print memExp
         print('\tpredict')
         predicted_lower_bounds, predicted_upper_bounds = self.net.predict([running_experience], [possible_moves])
-        print(predicted_lower_bounds)
-        predicted_lower_bounds = predicted_lower_bounds[0]
-        print(predicted_lower_bounds)
-        predicted_upper_bounds = predicted_upper_bounds[0]
         # print(prediction)
 
         lower_bound_action = -1
