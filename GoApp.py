@@ -87,7 +87,7 @@ class GoApp():
         self.brain.expert_forward(group_name, flatten_field(field), move_ind, move_num, is_black)
         return expert_move, 0, 0
 
-    def play(self, is_black_gnugo=False, is_white_gnugo=False):
+    def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=400):
         go = Go()
         move_num_black = 0
         move_num_white = 0
@@ -108,7 +108,7 @@ class GoApp():
         white_group_name = Go.white_str + '_' + vs_string + '_' + str(self.mem_index)
         self.mem_index += 1
 
-        while not go.is_finished:
+        while not go.is_finished and move_num_black + move_num_white < max_moves:
             bw = go.next
             field = go.get_field()
 
