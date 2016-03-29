@@ -107,19 +107,23 @@ class GoApp():
 
             if bw == Go.black_str:
                 if is_black_gnugo:
+                    is_gnugo = True
                     move, predicted_lower_bound, predicted_upper_bound = self.play_expert_move(go, black_group_name, field, move_num_black, True)
                 else:
+                    is_gnugo = False
                     move, predicted_lower_bound, predicted_upper_bound = self.play_net_move(go, black_group_name, field, move_num_black, True)
                 move_num_black += 1
             else:
-                if is_black_gnugo:
+                if is_white_gnugo:
+                    is_gnugo = True
                     move, predicted_lower_bound, predicted_upper_bound = self.play_expert_move(go, black_group_name, field, move_num_white, False)
                 else:
+                    is_gnugo = False
                     move, predicted_lower_bound, predicted_upper_bound = self.play_net_move(go, white_group_name, field, move_num_white, False)
                 move_num_white += 1
 
             field_str = go.get_field_as_str()
-            print_step(bw, move, field_str, predicted_lower_bound, predicted_upper_bound)
+            print_step(bw, is_gnugo, move, field_str, predicted_lower_bound, predicted_upper_bound)
         print_winner(go)
 
         if go.winner == Go.black_str:
