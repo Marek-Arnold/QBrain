@@ -142,7 +142,11 @@ class GoApp():
                     is_gnugo = False
                     move, predicted_lower_bound, predicted_upper_bound = self.play_net_move(go, black_group_name, field, move_num_black, True)
 
-                stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_black
+                if move[0] is not None:
+                    stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_black
+                else:
+                    self.brain.post_reward(black_group_name, -1, move_num_black, 1)
+
                 move_num_black += 1
             else:
                 if is_white_gnugo:
@@ -152,7 +156,10 @@ class GoApp():
                     is_gnugo = False
                     move, predicted_lower_bound, predicted_upper_bound = self.play_net_move(go, white_group_name, field, move_num_white, False)
 
-                stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_white
+                if move[0] is not None:
+                    stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_white
+                else:
+                    self.brain.post_reward(white_group_name, -1, move_num_white, 1)
                 move_num_white += 1
 
             now_field = go.get_field()
