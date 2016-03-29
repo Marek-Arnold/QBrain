@@ -8,6 +8,6 @@ def timed_unix_input(message, seconds):
     i, o, e = select.select([sys.stdin], [], [], seconds)
 
     if i:
-        return sys.stdin.readline().strip().decode()
+        return sys.stdin.readline().strip()
     else:
         return None
