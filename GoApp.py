@@ -116,7 +116,7 @@ class GoApp():
             else:
                 if is_white_gnugo:
                     is_gnugo = True
-                    move, predicted_lower_bound, predicted_upper_bound = self.play_expert_move(go, black_group_name, field, move_num_white, False)
+                    move, predicted_lower_bound, predicted_upper_bound = self.play_expert_move(go, white_group_name, field, move_num_white, False)
                 else:
                     is_gnugo = False
                     move, predicted_lower_bound, predicted_upper_bound = self.play_net_move(go, white_group_name, field, move_num_white, False)
