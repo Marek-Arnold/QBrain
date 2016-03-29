@@ -159,7 +159,7 @@ class QBrainGoNet:
                                                 self.constant_error_power))
         self.lower_bound_error = tf.reduce_sum(self.lower_bound_errors)
 
-        self.errors = tf.concat(0, [self.lower_bound_error, self.upper_bound_error])
+        self.errors = tf.concat(0, [tf.reshape(self.lower_bound_error, [1]), tf.reshape(self.upper_bound_error, [1])])
         self.error = tf.add(self.lower_bound_error, self.upper_bound_error)
         self.predicted_lower_and_upper_bounds = tf.concat(1,
                                                           self.lower_bound_possible_predicted_action_values,
