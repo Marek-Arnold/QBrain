@@ -108,7 +108,7 @@ class GoApp():
         white_group_name = Go.white_str + '_' + vs_string + '_' + str(self.mem_index)
         self.mem_index += 1
 
-        while not go.is_finished and move_num_black + move_num_white < max_moves:
+        while not go.is_finished:
             bw = go.next
             field = go.get_field()
 
@@ -131,6 +131,9 @@ class GoApp():
 
             field_str = go.get_field_as_str()
             print_step(bw, is_gnugo, move, field_str, predicted_lower_bound, predicted_upper_bound)
+
+            if move_num_black + move_num_white >= max_moves:
+                go.finish_game()
         print_winner(go)
 
         if go.winner == Go.black_str:
