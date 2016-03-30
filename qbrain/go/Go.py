@@ -6,6 +6,8 @@ def map_fields_from_alpha_to_ind(points):
     mapped = []
     for i in range(len(points)):
         p = points[i]
+        if p == Go.pass_str or p == Go.resign_str:
+            continue
         x = Go.alpha_values[p[0].upper()]
         y = int(p[1:]) - 1
         # print(str(p) + ' --> (' + str(x) + ', ' + str(y) + ')')
