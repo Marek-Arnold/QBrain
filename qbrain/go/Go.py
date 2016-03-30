@@ -92,12 +92,16 @@ class Go():
             final_score = final_score.strip()
             print(final_score)
             winner = final_score[0]
-            score = float(final_score[1:])
 
             if winner.upper() == 'W':
                 self.winner = Go.white_str
-            else:
+                score = float(final_score[1:])
+            elif winner.upper() == 'B':
                 self.winner = Go.black_str
+                score = float(final_score[1:])
+            else:
+                self.winner = None
+                score = 0.0
 
             self.score = score
 

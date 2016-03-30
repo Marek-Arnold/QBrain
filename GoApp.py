@@ -187,7 +187,7 @@ class GoApp():
         if go.winner == Go.black_str:
             self.brain.post_reward(black_group_name, go.score, 0, move_num_black)
             self.brain.post_reward(white_group_name, -go.score, 0, move_num_white)
-        else:
+        elif go.winner == Go.white_str:
             self.brain.post_reward(black_group_name, -go.score, 0, move_num_black)
             self.brain.post_reward(white_group_name, go.score, 0, move_num_white)
 
