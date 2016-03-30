@@ -145,7 +145,7 @@ class GoApp():
                 if move[0] is not None:
                     stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_black
                 else:
-                    self.brain.post_reward(black_group_name, -1, move_num_black, 1)
+                    self.brain.post_reward(black_group_name, -0.1, move_num_black, 1)
 
                 move_num_black += 1
             else:
@@ -159,7 +159,7 @@ class GoApp():
                 if move[0] is not None:
                     stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_white
                 else:
-                    self.brain.post_reward(white_group_name, -1, move_num_white, 1)
+                    self.brain.post_reward(white_group_name, -0.1, move_num_white, 1)
                 move_num_white += 1
 
             now_field = go.get_field()
@@ -169,12 +169,12 @@ class GoApp():
 
             for i in range(len(white_lost)):
                 placed_stone_at = stones_placed_at_move_field[white_lost[i][1]][white_lost[i][0]]
-                self.brain.post_reward(white_group_name, -1.0, placed_stone_at, move_num_white - placed_stone_at)
+                self.brain.post_reward(white_group_name, -10.0, placed_stone_at, move_num_white - placed_stone_at)
                 self.brain.post_reward(black_group_name, 1.0, placed_stone_at, move_num_black - placed_stone_at)
 
             for i in range(len(black_lost)):
                 placed_stone_at = stones_placed_at_move_field[black_lost[i][1]][black_lost[i][0]]
-                self.brain.post_reward(black_group_name, -1.0, placed_stone_at, move_num_black - placed_stone_at)
+                self.brain.post_reward(black_group_name, -10.0, placed_stone_at, move_num_black - placed_stone_at)
                 self.brain.post_reward(white_group_name, 1.0, placed_stone_at, move_num_white - placed_stone_at)
 
             field_str = go.get_field_as_str()
