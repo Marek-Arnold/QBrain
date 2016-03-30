@@ -105,7 +105,7 @@ class GoApp():
         self.brain.expert_forward(group_name, flatten_field(field), move_ind, move_num, is_black)
         return expert_move, 0, 0
 
-    def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=400):
+    def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=800):
         go = Go()
 
         last_field_of_stones = go.get_field()
@@ -209,23 +209,23 @@ class GoApp():
     def train(self, batch_size=6144, num_iter=10, max_err=0.0):
         self.brain.train(batch_size, num_iter, max_err, None)
 
-    def play_and_train(self, num_cycle=10, batch_size=6144, num_iter=2, num_batches=2):
+    def play_and_train(self, num_cycle=10, batch_size=6144, num_iter=2, num_batches=2, max_moves=800):
         for i in range(num_cycle):
-            self.play(is_black_gnugo=True, is_white_gnugo=False)
+            self.play(is_black_gnugo=True, is_white_gnugo=False, max_moves=max_moves)
             maybe_pause()
-            self.play(is_black_gnugo=True, is_white_gnugo=True)
+            self.play(is_black_gnugo=True, is_white_gnugo=True, max_moves=max_moves)
             maybe_pause()
-            self.play(is_black_gnugo=False, is_white_gnugo=True)
+            self.play(is_black_gnugo=False, is_white_gnugo=True, max_moves=max_moves)
             maybe_pause()
-            self.play(is_black_gnugo=False, is_white_gnugo=False)
+            self.play(is_black_gnugo=False, is_white_gnugo=False, max_moves=max_moves)
             maybe_pause()
             for batch_num in range(num_batches):
                 self.train(batch_size=batch_size, num_iter=num_iter)
         self.save()
 
-    def play_net_and_train(self, num_cycle=100, batch_size=6144, num_iter=4, num_batches=8):
+    def play_net_and_train(self, num_cycle=100, batch_size=6144, num_iter=4, num_batches=8, max_moves=800):
         for i in range(num_cycle):
-            self.play(is_black_gnugo=False, is_white_gnugo=False)
+            self.play(is_black_gnugo=False, is_white_gnugo=False, max_moves=max_moves)
             maybe_pause()
             for batch_num in range(num_batches):
                 self.train(batch_size=batch_size, num_iter=num_iter)
