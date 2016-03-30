@@ -194,6 +194,20 @@ class GoApp():
         self.brain.flush_group(black_group_name)
         self.brain.flush_group(white_group_name)
 
+    def replay_with_random_move(self, black_group_name, white_group_name,
+                                is_black_gnugo=False, is_white_gnugo=False, max_moves=800, num_moves_backward=1):
+
+        black_group = self.brain.mem.flushed_experience_groups[black_group_name]
+        white_group = self.brain.mem.flushed_experience_groups[white_group_name]
+
+        replay_move_num_black = 0
+        replay_move_num_white = 0
+
+        was_black_last = black_group.last > white_group.last
+
+        while (was_black_last and ()) or (not was_black_last and ()):
+            print()
+            
     def net_only(self):
         self.play(False, False)
 
