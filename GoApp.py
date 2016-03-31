@@ -128,7 +128,7 @@ def move_ind_to_move(move_ind, board_size, pass_move_ind):
     if move_ind == pass_move_ind:
         move = (None, Go.pass_str)
     else:
-        x = move_ind % board_size
+        x = int(move_ind % board_size)
         y = int(move_ind / board_size)
         move = ((x, y), None)
     return move
@@ -139,7 +139,7 @@ def move_to_move_ind(move, board_size, pass_move_ind):
         move_ind = pass_move_ind
     else:
         move_ind = move[0][0] + move[0][1] * board_size
-    return move_ind
+    return int(move_ind)
 
 
 class GoApp():
