@@ -320,14 +320,13 @@ class Replayer():
 
         elif move_num == self.last_replay_move_num + 1:
             if is_black:
-                possible_moves = go.get_black_possible_moves()
+                possible_moves = go.get_black_possible_moves_list()
             else:
-                possible_moves = go.get_white_possible_moves()
+                possible_moves = go.get_white_possible_moves_list()
 
-            flat_possible_moves = flatten_field(possible_moves)
-            rnd_index = random.randint(0, len(flat_possible_moves) + 1)
-            if rnd_index < len(flat_possible_moves):
-                move = (flat_possible_moves[rnd_index], None)
+            rnd_index = random.randint(0, len(possible_moves) + 1)
+            if rnd_index < len(possible_moves):
+                move = (possible_moves[rnd_index], None)
             else:
                 move = (None, Go.pass_str)
 
