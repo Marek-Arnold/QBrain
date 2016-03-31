@@ -331,6 +331,11 @@ class Replayer():
             else:
                 move = (None, Go.pass_str)
 
+            print('random move: ')
+            print(possible_moves)
+            print(rnd_index)
+            print(move)
+
             if move[0] is None:
                 go.move_pass()
             else:
