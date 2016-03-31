@@ -221,8 +221,8 @@ class GoApp():
              black_group_name=black_group_name, white_group_name=white_group_name,
              max_moves=max_moves)
 
-    def replay_all_experiences(self, max_moves=800, num_moves_backward=4, num_replays_per_experience=100):
-        for experience_group_name in self.brain.mem.flushed_experience_groups:
+    def replay_all_experiences(self, max_moves=800, num_moves_backward=4, num_replays_per_experience=5):
+        for experience_group_name in list(self.brain.mem.flushed_experience_groups):
             if not experience_group_name.startswith(GoApp.replay_experience_prefix) and experience_group_name.find(Go.white_str) < 0:
                 black_group_name = experience_group_name
                 white_group_name = black_group_name.replace(Go.black_str, Go.white_str)
