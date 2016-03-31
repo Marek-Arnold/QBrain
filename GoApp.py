@@ -1,5 +1,6 @@
 __author__ = 'Marek'
 import time
+import random
 import qbrain.util.timed_input as ti
 from qbrain.go.Go import Go
 from qbrain.go.QBrainGo import QBrainGo
@@ -15,12 +16,9 @@ def print_winner(go):
     print()
 
 
-def print_step(bw, is_gnugo, move, field, predicted_lower_bound, predicted_upper_bound):
+def print_step(bw, group_name, move, field, predicted_lower_bound, predicted_upper_bound):
     player = '('
-    if is_gnugo:
-        player += 'gnugo'
-    else:
-        player += 'net'
+    player += group_name
     player += ')'
     print(bw + ' ' + player + ': ' + str(move) + '\tlower: ' + str(predicted_lower_bound) + '\tupper: ' + str(predicted_upper_bound))
     print()
@@ -61,7 +59,93 @@ def black_stones_lost(previous_field, field):
     return res
 
 
+def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_group_name, max_moves):
+    last_field_of_stones = go.get_field()
+    stones_placed_at_move_field = go.get_field()
+
+    move_num_black = 0
+    move_num_white = 0
+
+    while not go.is_finished:
+        bw = go.next
+        field = go.get_field()
+
+        if bw == Go.black_str:
+            move, predicted_lower_bound, predicted_upper_bound = black_move_fun(go, black_group_name, field, move_num_black, True)
+
+            if move[0] is not None:
+                stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_black
+            else:
+                brain.post_reward(black_group_name, -0.1, move_num_black, 1)
+
+            move_num_black += 1
+        else:
+            move, predicted_lower_bound, predicted_upper_bound = white_move_fun(go, white_group_name, field, move_num_white, False)
+
+            if move[0] is not None:
+                stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_white
+            else:
+                brain.post_reward(white_group_name, -0.1, move_num_white, 1)
+            move_num_white += 1
+
+        now_field = go.get_field()
+        white_lost = white_stones_lost(last_field_of_stones, now_field)
+        black_lost = black_stones_lost(last_field_of_stones, now_field)
+        last_field_of_stones = now_field
+
+        for i in range(len(white_lost)):
+            placed_stone_at = stones_placed_at_move_field[white_lost[i][1]][white_lost[i][0]]
+            brain.post_reward(white_group_name, -10.0, placed_stone_at, move_num_white - placed_stone_at)
+            brain.post_reward(black_group_name, 1.0, placed_stone_at, move_num_black - placed_stone_at)
+
+        for i in range(len(black_lost)):
+            placed_stone_at = stones_placed_at_move_field[black_lost[i][1]][black_lost[i][0]]
+            brain.post_reward(black_group_name, -10.0, placed_stone_at, move_num_black - placed_stone_at)
+            brain.post_reward(white_group_name, 1.0, placed_stone_at, move_num_white - placed_stone_at)
+
+        field_str = go.get_field_as_str()
+        if Go.black_str == bw:
+            print_step(bw, black_group_name, move, field_str, predicted_lower_bound, predicted_upper_bound)
+        else:
+            print_step(bw, white_group_name, move, field_str, predicted_lower_bound, predicted_upper_bound)
+
+        if move_num_black + move_num_white >= max_moves:
+            go.finish_game()
+    print_winner(go)
+
+    if go.winner == Go.black_str:
+        brain.post_reward(black_group_name, go.score, 0, move_num_black)
+        brain.post_reward(white_group_name, -go.score, 0, move_num_white)
+    elif go.winner == Go.white_str:
+        brain.post_reward(black_group_name, -go.score, 0, move_num_black)
+        brain.post_reward(white_group_name, go.score, 0, move_num_white)
+
+    brain.flush_group(black_group_name)
+    brain.flush_group(white_group_name)
+
+
+def move_ind_to_move(move_ind, board_size, pass_move_ind):
+    if move_ind == pass_move_ind:
+        move = (None, Go.pass_str)
+    else:
+        x = move_ind % board_size
+        y = int(move_ind / board_size)
+        move = ((x, y), None)
+    return move
+
+
+def move_to_move_ind(move, board_size, pass_move_ind):
+    if move[0] is None:
+        move_ind = pass_move_ind
+    else:
+        move_ind = move[0][0] + move[0][1] * board_size
+    return move_ind
+
+
 class GoApp():
+    replay_experience_prefix = '__replay__'
+
+
     def __init__(self, board_size=19):
         self.board_size = board_size
         self.pass_move_ind = board_size * board_size
@@ -86,36 +170,25 @@ class GoApp():
                                                                                         possible_moves,
                                                                                         move_num,
                                                                                         is_black)
-        if net_move_ind == self.pass_move_ind:
-            net_move = (None, Go.pass_str)
+        net_move = move_ind_to_move(net_move_ind, self.board_size, self.pass_move_ind)
+
+        if net_move[0] is None:
             go.move_pass()
         else:
-            x = net_move_ind % self.board_size
-            y = int(net_move_ind / self.board_size)
-            net_move = ((x, y), None)
-            go.move(x, y)
+            go.move(net_move[0][0], net_move[0][1])
 
         return net_move, predicted_lower_bound, predicted_upper_bound
 
     def play_expert_move(self, go, group_name, field, move_num, is_black):
         expert_move = go.expert_move()
 
-        if expert_move[0] is None:
-            move_ind = self.pass_move_ind
-        else:
-            move_ind = expert_move[0][0] + expert_move[0][1] * self.board_size
+        move_ind = move_to_move_ind(expert_move, self.board_size, self.pass_move_ind)
 
         self.brain.expert_forward(group_name, flatten_field(field), move_ind, move_num, is_black)
         return expert_move, 0, 0
 
     def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=800):
         go = Go()
-
-        last_field_of_stones = go.get_field()
-        stones_placed_at_move_field = go.get_field()
-
-        move_num_black = 0
-        move_num_white = 0
 
         vs_string = ''
         if is_black_gnugo:
@@ -133,83 +206,57 @@ class GoApp():
         white_group_name = Go.white_str + '_' + vs_string + '_' + str(self.mem_index)
         self.mem_index += 1
 
-        while not go.is_finished:
-            bw = go.next
-            field = go.get_field()
+        if is_black_gnugo:
+            black_move_fun = self.play_expert_move
+        else:
+            black_move_fun = self.play_net_move
 
-            if bw == Go.black_str:
-                if is_black_gnugo:
-                    is_gnugo = True
-                    move, predicted_lower_bound, predicted_upper_bound = self.play_expert_move(go, black_group_name, field, move_num_black, True)
-                else:
-                    is_gnugo = False
-                    move, predicted_lower_bound, predicted_upper_bound = self.play_net_move(go, black_group_name, field, move_num_black, True)
+        if is_white_gnugo:
+            white_move_fun = self.play_expert_move
+        else:
+            white_move_fun = self.play_net_move
 
-                if move[0] is not None:
-                    stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_black
-                else:
-                    self.brain.post_reward(black_group_name, -0.1, move_num_black, 1)
+        play(brain=self.brain, go=go,
+             black_move_fun=black_move_fun, white_move_fun=white_move_fun,
+             black_group_name=black_group_name, white_group_name=white_group_name,
+             max_moves=max_moves)
 
-                move_num_black += 1
-            else:
-                if is_white_gnugo:
-                    is_gnugo = True
-                    move, predicted_lower_bound, predicted_upper_bound = self.play_expert_move(go, white_group_name, field, move_num_white, False)
-                else:
-                    is_gnugo = False
-                    move, predicted_lower_bound, predicted_upper_bound = self.play_net_move(go, white_group_name, field, move_num_white, False)
+    def replay_all_experiences(self, max_moves=800, num_moves_backward=4, num_replays_per_experience=100):
+        for experience_group_name in self.brain.mem.flushed_experience_groups:
+            if not experience_group_name.startswith(GoApp.replay_experience_prefix) and experience_group_name.find(Go.white_str) < 0:
+                black_group_name = experience_group_name
+                white_group_name = black_group_name.replace(Go.black_str, Go.white_str)
 
-                if move[0] is not None:
-                    stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_white
-                else:
-                    self.brain.post_reward(white_group_name, -0.1, move_num_white, 1)
-                move_num_white += 1
+                self.replay_with_random_move(black_group_name=black_group_name, white_group_name=white_group_name,
+                                             max_moves=max_moves, num_moves_backward=num_moves_backward,
+                                             num_replays=num_replays_per_experience)
 
-            now_field = go.get_field()
-            white_lost = white_stones_lost(last_field_of_stones, now_field)
-            black_lost = black_stones_lost(last_field_of_stones, now_field)
-            last_field_of_stones = now_field
-
-            for i in range(len(white_lost)):
-                placed_stone_at = stones_placed_at_move_field[white_lost[i][1]][white_lost[i][0]]
-                self.brain.post_reward(white_group_name, -10.0, placed_stone_at, move_num_white - placed_stone_at)
-                self.brain.post_reward(black_group_name, 1.0, placed_stone_at, move_num_black - placed_stone_at)
-
-            for i in range(len(black_lost)):
-                placed_stone_at = stones_placed_at_move_field[black_lost[i][1]][black_lost[i][0]]
-                self.brain.post_reward(black_group_name, -10.0, placed_stone_at, move_num_black - placed_stone_at)
-                self.brain.post_reward(white_group_name, 1.0, placed_stone_at, move_num_white - placed_stone_at)
-
-            field_str = go.get_field_as_str()
-            print_step(bw, is_gnugo, move, field_str, predicted_lower_bound, predicted_upper_bound)
-
-            if move_num_black + move_num_white >= max_moves:
-                go.finish_game()
-        print_winner(go)
-
-        if go.winner == Go.black_str:
-            self.brain.post_reward(black_group_name, go.score, 0, move_num_black)
-            self.brain.post_reward(white_group_name, -go.score, 0, move_num_white)
-        elif go.winner == Go.white_str:
-            self.brain.post_reward(black_group_name, -go.score, 0, move_num_black)
-            self.brain.post_reward(white_group_name, go.score, 0, move_num_white)
-
-        self.brain.flush_group(black_group_name)
-        self.brain.flush_group(white_group_name)
-
-    def replay_with_random_move(self, black_group_name, white_group_name,
-                                is_black_gnugo=False, is_white_gnugo=False, max_moves=800, num_moves_backward=1):
+    def replay_with_random_move(self, black_group_name, white_group_name, max_moves=800, num_moves_backward=4, num_replays=100):
 
         black_group = self.brain.mem.flushed_experience_groups[black_group_name]
         white_group = self.brain.mem.flushed_experience_groups[white_group_name]
 
-        replay_move_num_black = 0
-        replay_move_num_white = 0
+        for replay_num in range(num_replays):
+            group_name_prefix = GoApp.replay_experience_prefix + str(replay_num) + '_back_' + str(num_moves_backward) + '_'
 
-        was_black_last = black_group.last > white_group.last
+            black_group_name_replay = group_name_prefix + black_group_name
+            white_group_name_replay = group_name_prefix + white_group_name
 
-        while (was_black_last and ()) or (not was_black_last and ()):
-            print()
+            last_replay_move = black_group.last - num_moves_backward
+            black_replayer = Replayer(brain=self.brain,
+                                      experience_group=black_group, last_replay_move_num=last_replay_move,
+                                      move_fun=self.play_expert_move,
+                                      board_size=self.board_size, pass_move_ind=self.pass_move_ind)
+
+            last_replay_move = white_group.last - num_moves_backward
+            white_replayer = Replayer(brain=self.brain,
+                                      experience_group=white_group, last_replay_move_num=last_replay_move,
+                                      move_fun=self.play_expert_move,
+                                      board_size=self.board_size, pass_move_ind=self.pass_move_ind)
+            go = Go()
+            play(brain=self.brain, go=go, max_moves=max_moves,
+                 black_move_fun=black_replayer.play_move, black_group_name=black_group_name_replay,
+                 white_move_fun=white_replayer.play_move, white_group_name=white_group_name_replay)
             
     def net_only(self):
         self.play(False, False)
@@ -247,3 +294,50 @@ class GoApp():
             for batch_num in range(num_batches):
                 self.train(batch_size=batch_size, num_iter=num_iter)
         self.save()
+
+
+class Replayer():
+    def __init__(self, brain, experience_group, last_replay_move_num, move_fun, board_size, pass_move_ind):
+        self.brain = brain
+        self.experience_group = experience_group
+        self.last_replay_move_num = last_replay_move_num
+        self.move_fun = move_fun
+        self.board_size = board_size
+        self.pass_move_ind = pass_move_ind
+
+    def play_move(self, go, group_name, field, move_num, is_black):
+
+        lower = upper = 0
+        if move_num <= self.last_replay_move_num and move_num in self.experience_group.group:
+            exp = self.experience_group.group[move_num]
+            move = move_ind_to_move(exp.action, self.board_size, self.pass_move_ind)
+            if move[0] is None:
+                go.move_pass()
+            else:
+                go.move(move[0][0], move[0][1])
+
+            self.brain.expert_forward(group_name, flatten_field(field), exp.action, move_num, is_black)
+
+        elif move_num == self.last_replay_move_num + 1:
+            if is_black:
+                possible_moves = go.get_black_possible_moves()
+            else:
+                possible_moves = go.get_white_possible_moves()
+
+            rnd_index = random.randint(0, len(possible_moves) + 1)
+            if rnd_index < len(possible_moves):
+                move = possible_moves[rnd_index]
+            else:
+                move = (None, Go.pass_str)
+
+            if move[0] is None:
+                go.move_pass()
+            else:
+                go.move(move[0][0], move[0][1])
+
+            self.brain.expert_forward(group_name, flatten_field(field), move_to_move_ind(move, self.board_size, self.pass_move_ind), move_num, is_black)
+
+        else:
+            move, lower, upper = self.move_fun(go, group_name, field, move_num, is_black)
+
+        return move, lower, upper
