@@ -196,3 +196,6 @@ class Go():
 
     def show_board(self):
         return self.go.showboard()
+
+    def close(self):
+        self.go.close()
