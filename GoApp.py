@@ -231,7 +231,7 @@ class GoApp():
                                              max_moves=max_moves, num_moves_backward=num_moves_backward,
                                              num_replays=num_replays_per_experience)
 
-    def replay_with_random_move(self, black_group_name, white_group_name, max_moves=800, num_moves_backward=4, num_replays=100):
+    def replay_with_random_move(self, black_group_name, white_group_name, max_moves=800, num_moves_backward=4, num_replays=5):
 
         black_group = self.brain.mem.flushed_experience_groups[black_group_name]
         white_group = self.brain.mem.flushed_experience_groups[white_group_name]
