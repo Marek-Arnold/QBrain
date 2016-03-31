@@ -142,6 +142,22 @@ def move_to_move_ind(move, board_size, pass_move_ind):
     return int(move_ind)
 
 
+def get_vs_str(is_black_gnugo, is_white_gnugo):
+    vs_string = ''
+    if is_black_gnugo:
+        vs_string += 'gnugo'
+    else:
+        vs_string += 'net'
+    vs_string += '_vs_'
+
+    if is_white_gnugo:
+        vs_string += 'gnugo'
+    else:
+        vs_string += 'net'
+
+    return vs_string
+
+
 class GoApp():
     replay_experience_prefix = '__replay__'
 
@@ -190,17 +206,7 @@ class GoApp():
     def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=800):
         go = Go()
 
-        vs_string = ''
-        if is_black_gnugo:
-            vs_string += 'gnugo'
-        else:
-            vs_string += 'net'
-        vs_string += '_vs_'
-
-        if is_white_gnugo:
-            vs_string += 'gnugo'
-        else:
-            vs_string += 'net'
+        vs_string = get_vs_str(is_black_gnugo, is_white_gnugo)
 
         black_group_name = Go.black_str + '_' + vs_string + '_' + str(self.mem_index)
         white_group_name = Go.white_str + '_' + vs_string + '_' + str(self.mem_index)
@@ -221,37 +227,50 @@ class GoApp():
              black_group_name=black_group_name, white_group_name=white_group_name,
              max_moves=max_moves)
 
-    def replay_all_experiences(self, max_moves=800, num_moves_backward=4, num_replays_per_experience=5):
+    def replay_all_experiences(self, is_black_gnugo=True, is_white_gnugo=True, max_moves=8000, num_moves_backward=4, num_replays_per_experience=5):
         for experience_group_name in list(self.brain.mem.flushed_experience_groups):
             if not experience_group_name.startswith(GoApp.replay_experience_prefix) and experience_group_name.find(Go.white_str) < 0:
                 black_group_name = experience_group_name
                 white_group_name = black_group_name.replace(Go.black_str, Go.white_str)
 
                 self.replay_with_random_move(black_group_name=black_group_name, white_group_name=white_group_name,
+                                             is_black_gnugo=is_black_gnugo, is_white_gnugo=is_white_gnugo,
                                              max_moves=max_moves, num_moves_backward=num_moves_backward,
                                              num_replays=num_replays_per_experience)
 
-    def replay_with_random_move(self, black_group_name, white_group_name, max_moves=800, num_moves_backward=4, num_replays=5):
+    def replay_with_random_move(self, black_group_name, white_group_name, is_black_gnugo=True, is_white_gnugo=True, max_moves=8000, num_moves_backward=4, num_replays=5):
 
         black_group = self.brain.mem.flushed_experience_groups[black_group_name]
         white_group = self.brain.mem.flushed_experience_groups[white_group_name]
 
+        vs_string = get_vs_str(is_black_gnugo, is_white_gnugo)
+
         for replay_num in range(num_replays):
-            group_name_prefix = GoApp.replay_experience_prefix + str(replay_num) + '_back_' + str(num_moves_backward) + '_'
+            group_name_prefix = GoApp.replay_experience_prefix + str(replay_num) + '_' + vs_string + '_back_' + str(num_moves_backward) + '_'
 
             black_group_name_replay = group_name_prefix + black_group_name
             white_group_name_replay = group_name_prefix + white_group_name
 
+            if is_black_gnugo:
+                move_fun = self.play_expert_move
+            else:
+                move_fun = self.play_net_move
+
             last_replay_move = black_group.last - num_moves_backward
             black_replayer = Replayer(brain=self.brain,
                                       experience_group=black_group, last_replay_move_num=last_replay_move,
-                                      move_fun=self.play_expert_move,
+                                      move_fun=move_fun,
                                       board_size=self.board_size, pass_move_ind=self.pass_move_ind)
+
+            if is_white_gnugo:
+                move_fun = self.play_expert_move
+            else:
+                move_fun = self.play_net_move
 
             last_replay_move = white_group.last - num_moves_backward
             white_replayer = Replayer(brain=self.brain,
                                       experience_group=white_group, last_replay_move_num=last_replay_move,
-                                      move_fun=self.play_expert_move,
+                                      move_fun=move_fun,
                                       board_size=self.board_size, pass_move_ind=self.pass_move_ind)
             go = Go()
             play(brain=self.brain, go=go, max_moves=max_moves,
