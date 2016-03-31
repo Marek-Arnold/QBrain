@@ -106,6 +106,9 @@ class GoTextPipe(GoTextBase):
         return result[1:]
 
     def close(self):
-        self.gnugo.communicate('quit\n')
+        try:
+            self.gnugo.communicate('quit\n')
+        except:
+            pass
         self.gnugo = None
 
