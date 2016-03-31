@@ -13,7 +13,7 @@ class QBrainGoMemory:
     Memory to work with and to persist Experience.
     """
 
-    def __init__(self, num_inputs, num_actions):
+    def __init__(self, num_inputs, num_actions, path, base_name, extension):
         """
 
         Parameters
@@ -27,6 +27,10 @@ class QBrainGoMemory:
         -------
         :return: QBrainMemory
         """
+        self.path = path
+        self.base_name = base_name
+        self.extension = extension
+
         self.experience_groups = {}
         self.reward_groups = {}
         self.flushed_experience_groups = {}
@@ -106,9 +110,29 @@ class QBrainGoMemory:
                         experience = experience_group.group[time]
                         experience.reward += r
 
-            self.flushed_experience_groups[group_name] = experience_group
+            self.save_group(experience_group, group_name)
+            self.flushed_experience_groups[group_name] = None
             self.experience_groups.pop(group_name)
             self.reward_groups.pop(group_name)
+
+    def get_save_path(self, group_name):
+        full_path = self.path + self.base_name + '_' + group_name + self.extension
+        return full_path
+
+    def save_group(self, group, group_name):
+        full_path = self.get_save_path(group_name)
+        if os.path.isfile(full_path):
+            print('Not overwriting ' + full_path + ' as it already exists.')
+        else:
+            self.save_obj(group, full_path)
+
+    def load_group(self, group_name):
+        full_path = self.get_save_path(group_name)
+        if not os.path.exists(full_path):
+            print('Group not found! ' + full_path)
+            return None
+        else:
+            return self.load_obj(full_path)
 
     def get_batch(self, batch_size):
         """
@@ -129,32 +153,7 @@ class QBrainGoMemory:
 
         return self.get_batch_from_groups(batch_size, self.flushed_experience_groups, self.num_actions)
 
-    def save(self, path, base_name, extension):
-        """
-        Save all flushed groups to disk.
-
-        Parameters
-        ----------
-        :param path: str
-            The path for the files where the flushed groups are stored.
-        :param base_name: str
-            The first part of the name for the flushed groups.
-        :param extension: str
-            The extension to use for the files.
-
-        Returns
-        -------
-        :return: None
-        """
-
-        for group_name in self.flushed_experience_groups:
-            full_path = path + base_name + '_' + group_name + extension
-            if os.path.isfile(full_path):
-                print('Not overwriting ' + full_path + ' as it already exists.')
-            else:
-                self.save_obj(self.flushed_experience_groups[group_name], full_path)
-
-    def load(self, path, base_name, extension):
+    def load(self):
         """
         Restore some previously saved flushed groups.
 
@@ -172,35 +171,18 @@ class QBrainGoMemory:
         :return: None
         """
         self.flushed_experience_groups = {}
-        if not os.path.exists(path):
-            print('Path not found! ' + path)
+        if not os.path.exists(self.path):
+            print('Path not found! ' + self.path)
         else:
-            for file_name in os.listdir(path):
-                if file_name[:len(base_name)] == base_name and file_name[-len(extension):] == extension:
-                    self.flushed_experience_groups[file_name[len(base_name) + 1:-len(extension)]] = self.load_obj(
-                        path + file_name)
+            for file_name in os.listdir(self.path):
+                if file_name[:len(self.base_name)] == self.base_name and file_name[-len(self.extension):] == self.extension:
+                    self.flushed_experience_groups[file_name[len(self.base_name) + 1:-len(self.extension)]] = None
 
-    def load_single_file(self, name):
-        """
-        Restore some previously saved flushed groups.
-
-        Parameters
-        ----------
-        :param name: str
-            The name and path of the flushed experience groups.
-
-        Returns
-        -------
-        :return: None
-        """
-        self.flushed_experience_groups = self.load_obj(name)
-
-    @staticmethod
-    def get_batch_from_groups(batch_size, groups, num_actions):
+    def get_batch_from_groups(self, batch_size, groups, num_actions):
         batch_x = []
         batch_y = []
         for batch_num in range(0, batch_size):
-            group = random.choice(list(groups.values()))
+            group = self.load_group(random.choice(list(groups.keys())))
             ind = random.randint(group.first, group.last)
             experience = group.group[ind]
             batch_x.append(experience.input_features)

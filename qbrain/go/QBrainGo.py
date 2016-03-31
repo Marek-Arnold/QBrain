@@ -12,7 +12,9 @@ class QBrainGo:
     def __init__(self,
                  board_size,
                  convolution_layers,
-                 fully_connected_layers):
+                 fully_connected_layers,
+                 mem_path, mem_base_name, mem_extension,
+                 net_path, net_base_name, net_extension):
         """
         Parameters
         ----------
@@ -31,6 +33,13 @@ class QBrainGo:
         -------
         :return: QBrain
         """
+        self.mem_path = mem_path
+        self.mem_base_name = mem_base_name
+        self.mem_extension = mem_extension
+        self.net_path = net_path
+        self.net_base_name = net_base_name
+        self.net_extension = net_extension
+
         self.field_size = board_size * board_size
 
         self.net = QBrainGoNet(
@@ -38,7 +47,7 @@ class QBrainGo:
             convolution_layers,
             fully_connected_layers)
 
-        self.mem = QBrainGoMemory(self.field_size, self.field_size + 1)
+        self.mem = QBrainGoMemory(self.field_size, self.field_size + 1, self.mem_path, self.mem_base_name, self.mem_extension)
 
     def forward(self, group_name, input_features, possible_moves, time, is_black):
         """
@@ -177,7 +186,7 @@ class QBrainGo:
         """
         self.mem.flush_group(group_name)
 
-    def save(self, model_name):
+    def save(self):
         """
         Persist the model and the experience.
 
@@ -190,14 +199,13 @@ class QBrainGo:
         -------
         :return: None
         """
-        if not os.path.exists('saves/'):
-            os.mkdir('saves/')
-        self.mem.save('saves/', model_name, '.pkl')
-        self.net.save_multi_file('saves/' + model_name, '.ckpt')
+        if not os.path.exists(self.net_path):
+            os.mkdir(self.net_path)
+        self.net.save_multi_file(self.net_path + self.net_base_name, self.net_extension)
         print('saved')
 
-    def load(self, model_base_name):
-        self.net.load_multi_file('saves/' + model_base_name, '.ckpt')
-        self.mem.load('saves/', model_base_name, '.pkl')
+    def load(self):
+        self.net.load_multi_file(self.net_path + self.net_base_name, self.net_extension)
+        self.mem.load()
         print('loaded')
 

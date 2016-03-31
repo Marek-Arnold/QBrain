@@ -165,8 +165,10 @@ class GoApp():
     def __init__(self, board_size=19):
         self.board_size = board_size
         self.pass_move_ind = board_size * board_size
-        self.brain = QBrainGo(board_size, [(3, 8), (5, 12), (8, 16)], [4096, 2048])
-        self.brain.load('go_autosave')
+        self.brain = QBrainGo(board_size, [(3, 8), (5, 12), (8, 16)], [4096, 2048],
+                              'saves_mem/', 'go_autosave', '.pkl',
+                              'saves_net/', 'go_autosave', 'ckpt')
+        self.brain.load()
         millis = int(round(time.time() * 1000))
         self.mem_index = millis
         print('Ready..')
@@ -242,8 +244,8 @@ class GoApp():
 
     def replay_with_random_move(self, black_group_name, white_group_name, is_black_gnugo=True, is_white_gnugo=True, max_moves=8000, num_moves_backward=4, num_replays=5):
 
-        black_group = self.brain.mem.flushed_experience_groups[black_group_name]
-        white_group = self.brain.mem.flushed_experience_groups[white_group_name]
+        black_group = self.brain.mem.load_group(black_group_name)
+        white_group = self.brain.mem.load_group(white_group_name)
 
         vs_string = get_vs_str(is_black_gnugo, is_white_gnugo)
 
@@ -285,11 +287,11 @@ class GoApp():
     def expert_only(self):
         self.play(True, True)
 
-    def save(self, name='go_autosave'):
-        self.brain.save(name)
+    def save(self):
+        self.brain.save()
 
-    def load(self, name='go_autosave'):
-        self.brain.load(name)
+    def load(self):
+        self.brain.load()
 
     def train(self, batch_size=6144, num_iter=10, max_err=0.0):
         self.brain.train(batch_size, num_iter, max_err, None)
