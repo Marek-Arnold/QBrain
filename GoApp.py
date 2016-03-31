@@ -324,16 +324,12 @@ class Replayer():
             else:
                 possible_moves = go.get_white_possible_moves()
 
-            rnd_index = random.randint(0, len(possible_moves) + 1)
-            if rnd_index < len(possible_moves):
-                move = (possible_moves[rnd_index], None)
+            flat_possible_moves = flatten_field(possible_moves)
+            rnd_index = random.randint(0, len(flat_possible_moves) + 1)
+            if rnd_index < len(flat_possible_moves):
+                move = (flat_possible_moves[rnd_index], None)
             else:
                 move = (None, Go.pass_str)
-
-            print('random move: ')
-            print(possible_moves)
-            print(rnd_index)
-            print(move)
 
             if move[0] is None:
                 go.move_pass()
