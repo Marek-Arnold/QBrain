@@ -326,7 +326,7 @@ class Replayer():
 
             rnd_index = random.randint(0, len(possible_moves) + 1)
             if rnd_index < len(possible_moves):
-                move = possible_moves[rnd_index]
+                move = (possible_moves[rnd_index], None)
             else:
                 move = (None, Go.pass_str)
 
