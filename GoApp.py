@@ -6,7 +6,10 @@ from qbrain.go.QBrainGo import QBrainGo
 
 
 def print_winner(go):
-    print(go.winner + ': ' + str(go.score))
+    if go.winner is None:
+        print('draw')
+    else:
+        print(go.winner + ': ' + str(go.score))
     print('-' * 40)
     print()
     print()
