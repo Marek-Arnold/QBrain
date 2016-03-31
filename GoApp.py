@@ -293,10 +293,10 @@ class GoApp():
     def load(self):
         self.brain.load()
 
-    def train(self, batch_size=6144, num_iter=10, max_err=0.0):
+    def train(self, batch_size=1024, num_iter=10, max_err=0.0):
         self.brain.train(batch_size, num_iter, max_err, None)
 
-    def play_and_train(self, num_cycle=10, batch_size=6144, num_iter=2, num_batches=2, max_moves=800):
+    def play_and_train(self, num_cycle=10, batch_size=1024, num_iter=2, num_batches=2, max_moves=800):
         for i in range(num_cycle):
             self.play(is_black_gnugo=True, is_white_gnugo=False, max_moves=max_moves)
             maybe_pause()
@@ -310,7 +310,7 @@ class GoApp():
                 self.train(batch_size=batch_size, num_iter=num_iter)
         self.save()
 
-    def play_net_and_train(self, num_cycle=100, batch_size=6144, num_iter=4, num_batches=8, max_moves=800):
+    def play_net_and_train(self, num_cycle=100, batch_size=1024, num_iter=4, num_batches=8, max_moves=800):
         for i in range(num_cycle):
             self.play(is_black_gnugo=False, is_white_gnugo=False, max_moves=max_moves)
             maybe_pause()
