@@ -80,7 +80,7 @@ class Go():
 
     def move(self, x, y):
         if not self.is_finished:
-            position = Go.alpha_positions[x] + str((y + 1))
+            position = Go.alpha_positions[int(x)] + str((y + 1))
             self.go.play(self.next, position)
             self.last_has_passed = False
             self.switch_next()
