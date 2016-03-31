@@ -80,7 +80,7 @@ class Go():
 
     def move(self, x, y):
         if not self.is_finished:
-            position = Go.alpha_positions[x] + str((y + 1))
+            position = Go.alpha_positions[int(x)] + str((y + 1))
             self.go.play(self.next, position)
             self.last_has_passed = False
             self.switch_next()
@@ -155,14 +155,22 @@ class Go():
             field_str += '\n'
         return field_str
 
-    def get_black_possible_moves(self):
+    def get_black_possible_moves_list(self):
         legal_moves = self.legal_black_moves()
         mapped_moves = map_fields_from_alpha_to_ind(legal_moves)
+        return mapped_moves
+
+    def get_black_possible_moves(self):
+        mapped_moves = self.get_black_possible_moves_list()
         return self.map_points_to_field(mapped_moves)
 
-    def get_white_possible_moves(self):
+    def get_white_possible_moves_list(self):
         legal_moves = self.legal_white_moves()
         mapped_moves = map_fields_from_alpha_to_ind(legal_moves)
+        return mapped_moves
+
+    def get_white_possible_moves(self):
+        mapped_moves = self.get_white_possible_moves_list()
         return self.map_points_to_field(mapped_moves)
 
     def map_points_to_field(self, points):
@@ -188,3 +196,6 @@ class Go():
 
     def show_board(self):
         return self.go.showboard()
+
+    def close(self):
+        self.go.close()
