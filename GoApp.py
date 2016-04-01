@@ -35,8 +35,8 @@ def flatten_field(field):
     return flat_field
 
 
-def maybe_pause():
-    ans = ti.timed_unix_input('Continue in 5 seconds, press enter to pause', 5)
+def maybe_pause(num_seconds=5, message='Continue in 5 seconds, press enter to pause'):
+    ans = ti.timed_unix_input(message, num_seconds)
     if ans is not None:
         input('press enter to continue..')
 
@@ -59,7 +59,7 @@ def black_stones_lost(previous_field, field):
     return res
 
 
-def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_group_name, max_moves):
+def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_group_name, max_moves, maybe_pause_enabled):
     last_field_of_stones = go.get_field()
     stones_placed_at_move_field = go.get_field()
 
@@ -111,6 +111,9 @@ def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_grou
 
         if move_num_black + move_num_white >= max_moves:
             go.finish_game()
+
+        if maybe_pause_enabled:
+            maybe_pause(num_seconds=10, message='Next move in 10 seconds, press enter for pause..')
     print_winner(go)
 
     if go.winner == Go.black_str:
@@ -205,7 +208,7 @@ class GoApp():
         self.brain.expert_forward(group_name, flatten_field(field), move_ind, move_num, is_black)
         return expert_move, 0, 0
 
-    def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=800, auto_replay=True):
+    def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=800, auto_replay=True, maybe_pause_enabled=False):
         go = Go()
 
         vs_string = get_vs_str(is_black_gnugo, is_white_gnugo)
@@ -227,7 +230,7 @@ class GoApp():
         play(brain=self.brain, go=go,
              black_move_fun=black_move_fun, white_move_fun=white_move_fun,
              black_group_name=black_group_name, white_group_name=white_group_name,
-             max_moves=max_moves)
+             max_moves=max_moves, maybe_pause_enabled=maybe_pause_enabled)
 
         go.close()
 
@@ -284,11 +287,11 @@ class GoApp():
                  black_move_fun=black_replayer.play_move, black_group_name=black_group_name_replay,
                  white_move_fun=white_replayer.play_move, white_group_name=white_group_name_replay)
             
-    def net_only(self):
-        self.play(False, False)
+    def net_only(self, maybe_pause_enabled=False):
+        self.play(False, False, maybe_pause_enabled=maybe_pause_enabled)
 
-    def expert_only(self):
-        self.play(True, True)
+    def expert_only(self, maybe_pause_enabled=False):
+        self.play(True, True, maybe_pause_enabled=maybe_pause_enabled)
 
     def save(self):
         self.brain.save()
@@ -299,23 +302,23 @@ class GoApp():
     def train(self, batch_size=1024, num_iter=10, max_err=0.0):
         self.brain.train(batch_size, num_iter, max_err, None)
 
-    def play_and_train(self, num_cycle=10, batch_size=1024, num_iter=2, num_batches=2, max_moves=800):
+    def play_and_train(self, num_cycle=10, batch_size=1024, num_iter=2, num_batches=2, max_moves=800, maybe_pause_enabled=False):
         for i in range(num_cycle):
-            self.play(is_black_gnugo=True, is_white_gnugo=False, max_moves=max_moves)
+            self.play(is_black_gnugo=True, is_white_gnugo=False, max_moves=max_moves, maybe_pause_enabled=maybe_pause_enabled)
             maybe_pause()
-            self.play(is_black_gnugo=True, is_white_gnugo=True, max_moves=max_moves)
+            self.play(is_black_gnugo=True, is_white_gnugo=True, max_moves=max_moves, maybe_pause_enabled=maybe_pause_enabled)
             maybe_pause()
-            self.play(is_black_gnugo=False, is_white_gnugo=True, max_moves=max_moves)
+            self.play(is_black_gnugo=False, is_white_gnugo=True, max_moves=max_moves, maybe_pause_enabled=maybe_pause_enabled)
             maybe_pause()
-            self.play(is_black_gnugo=False, is_white_gnugo=False, max_moves=max_moves)
+            self.play(is_black_gnugo=False, is_white_gnugo=False, max_moves=max_moves, maybe_pause_enabled=maybe_pause_enabled)
             maybe_pause()
             for batch_num in range(num_batches):
                 self.train(batch_size=batch_size, num_iter=num_iter)
         self.save()
 
-    def play_net_and_train(self, num_cycle=100, batch_size=1024, num_iter=4, num_batches=8, max_moves=800):
+    def play_net_and_train(self, num_cycle=100, batch_size=1024, num_iter=4, num_batches=8, max_moves=800, maybe_pause_enabled=False):
         for i in range(num_cycle):
-            self.play(is_black_gnugo=False, is_white_gnugo=False, max_moves=max_moves)
+            self.play(is_black_gnugo=False, is_white_gnugo=False, max_moves=max_moves, maybe_pause_enabled=maybe_pause_enabled)
             maybe_pause()
             for batch_num in range(num_batches):
                 self.train(batch_size=batch_size, num_iter=num_iter)
