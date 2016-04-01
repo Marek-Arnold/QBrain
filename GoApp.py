@@ -188,7 +188,7 @@ class GoApp():
         possible_moves.extend(flatten_field(pm))
         possible_moves.append(1.0)
         net_move_ind, predicted_lower_bound, predicted_upper_bound = self.brain.forward(group_name,
-                                                                                        flatten_field(field),
+                                                                                        field,
                                                                                         possible_moves,
                                                                                         move_num,
                                                                                         is_black)
@@ -206,7 +206,7 @@ class GoApp():
 
         move_ind = move_to_move_ind(expert_move, self.board_size, self.pass_move_ind)
 
-        self.brain.expert_forward(group_name, flatten_field(field), move_ind, move_num, is_black)
+        self.brain.expert_forward(group_name, field, move_ind, move_num, is_black)
         return expert_move, 0, 0
 
     def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=800, auto_replay=True, maybe_pause_enabled=False):
@@ -346,7 +346,7 @@ class Replayer():
             else:
                 go.move(move[0][0], move[0][1])
 
-            self.brain.expert_forward(group_name, flatten_field(field), exp.action, move_num, is_black)
+            self.brain.expert_forward(group_name, field, exp.action, move_num, is_black)
 
         elif move_num == self.last_replay_move_num + 1:
             if is_black:
@@ -370,7 +370,7 @@ class Replayer():
             else:
                 go.move(move[0][0], move[0][1])
 
-            self.brain.expert_forward(group_name, flatten_field(field), move_to_move_ind(move, self.board_size, self.pass_move_ind), move_num, is_black)
+            self.brain.expert_forward(group_name, field, move_to_move_ind(move, self.board_size, self.pass_move_ind), move_num, is_black)
 
         else:
             move, lower, upper = self.move_fun(go, group_name, field, move_num, is_black)

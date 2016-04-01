@@ -57,7 +57,7 @@ class QBrainGoNet:
             initial = tf.constant(0.1, shape=shape)
             return tf.Variable(initial, name="bias_" + name)
 
-        reshaped_x = tf.reshape(self.x, [-1, self.board_size, self.board_size, 1])
+        reshaped_x = tf.reshape(self.x, [-1, self.board_size, self.board_size, 3])
 
         W_conv = [None] * len(convolution_layers)
         b_conv = [None] * len(convolution_layers)
@@ -67,7 +67,7 @@ class QBrainGoNet:
             conv_layer = convolution_layers[conv_layer_num]
 
             if conv_layer_num == 0:
-                input_channels = 1
+                input_channels = 3
                 input_data = reshaped_x
             else:
                 input_channels = convolution_layers[conv_layer_num - 1][1]
