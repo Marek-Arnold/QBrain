@@ -36,6 +36,8 @@ class QBrainGoMemory:
         self.flushed_experience_groups = {}
         self.num_actions = num_actions
         self.num_inputs = num_inputs
+        if not os.path.exists(self.path):
+            os.makedirs(self.path)
 
     def put_experience(self, group_name, input_features, action, time):
         """
@@ -121,6 +123,7 @@ class QBrainGoMemory:
 
     def save_group(self, group, group_name):
         full_path = self.get_save_path(group_name)
+
         if os.path.isfile(full_path):
             print('Not overwriting ' + full_path + ' as it already exists.')
         else:
