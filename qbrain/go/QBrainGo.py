@@ -73,13 +73,7 @@ class QBrainGo:
         running_experience = input_features
 
         if not is_black:
-            for x in range(len(running_experience)):
-                for y in range(len(running_experience[x])):
-                    r = running_experience[x][y]
-                    if r == Go.black_field:
-                        running_experience[x][y] = Go.white_field
-                    elif r == Go.white_field:
-                        running_experience[x][y] = Go.black_field
+            self.invert_field_in_place(running_experience)
 
         # print memExp
         print('\tpredict')
@@ -109,6 +103,15 @@ class QBrainGo:
         self.mem.put_experience(group_name, input_features, action, time)
         return action, predicted_lower_bounds[action], predicted_upper_bounds[action]
 
+    def invert_field_in_place(self, field):
+        for x in range(len(field)):
+            for y in range(len(field[x])):
+                r = field[x][y]
+                if r == Go.black_field:
+                    field[x][y] = Go.white_field
+                elif r == Go.white_field:
+                    field[x][y] = Go.black_field
+
     def expert_forward(self, group_name, input_features, action, time, is_black):
         """
         Feed an expert decision into the observations.
@@ -129,8 +132,7 @@ class QBrainGo:
         :return: None
         """
         if not is_black:
-            inverted_exp = [i * -1.0 for i in input_features]
-            input_features = inverted_exp
+            self.invert_field_in_place(input_features)
         self.mem.put_experience(group_name, input_features, action, time)
 
     def train(self, batch_size, num_iter, max_error, train_layer_name):
