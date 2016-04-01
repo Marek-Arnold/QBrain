@@ -165,7 +165,7 @@ class GoApp():
     def __init__(self, board_size=19):
         self.board_size = board_size
         self.pass_move_ind = board_size * board_size
-        self.brain = QBrainGo(board_size, [(3, 8), (5, 12), (8, 16)], [4096, 2048],
+        self.brain = QBrainGo(board_size, [(3, 16), (5, 32), (9, 64)], [4096, 2048, 1024, 1024, 1024],
                               'saves_mem/', 'go_autosave', '.pkl',
                               'saves_net/', 'go_autosave', '.ckpt')
         self.brain.load()
