@@ -90,20 +90,20 @@ def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_grou
                 brain.post_reward(white_group_name, -0.1, move_num_white, 1)
             move_num_white += 1
 
-        now_field = go.get_field()
-        white_lost = white_stones_lost(last_field_of_stones, now_field)
-        black_lost = black_stones_lost(last_field_of_stones, now_field)
-        last_field_of_stones = now_field
+        # now_field = go.get_field()
+        # white_lost = white_stones_lost(last_field_of_stones, now_field)
+        # black_lost = black_stones_lost(last_field_of_stones, now_field)
+        # last_field_of_stones = now_field
 
-        for i in range(len(white_lost)):
-            placed_stone_at = stones_placed_at_move_field[white_lost[i][0]][white_lost[i][1]]
-            brain.post_reward(white_group_name, -10.0, placed_stone_at, move_num_white - placed_stone_at)
-            brain.post_reward(black_group_name, 1.0, placed_stone_at, move_num_black - placed_stone_at)
-
-        for i in range(len(black_lost)):
-            placed_stone_at = stones_placed_at_move_field[black_lost[i][0]][black_lost[i][1]]
-            brain.post_reward(black_group_name, -10.0, placed_stone_at, move_num_black - placed_stone_at)
-            brain.post_reward(white_group_name, 1.0, placed_stone_at, move_num_white - placed_stone_at)
+        # for i in range(len(white_lost)):
+        #     placed_stone_at = stones_placed_at_move_field[white_lost[i][0]][white_lost[i][1]]
+        #     brain.post_reward(white_group_name, -10.0, placed_stone_at, move_num_white - placed_stone_at)
+        #     brain.post_reward(black_group_name, 1.0, placed_stone_at, move_num_black - placed_stone_at)
+        #
+        # for i in range(len(black_lost)):
+        #     placed_stone_at = stones_placed_at_move_field[black_lost[i][0]][black_lost[i][1]]
+        #     brain.post_reward(black_group_name, -10.0, placed_stone_at, move_num_black - placed_stone_at)
+        #     brain.post_reward(white_group_name, 1.0, placed_stone_at, move_num_white - placed_stone_at)
 
         field_str = go.get_field_as_str()
         if Go.black_str == bw:
