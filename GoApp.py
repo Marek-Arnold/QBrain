@@ -205,7 +205,7 @@ class GoApp():
         self.brain.expert_forward(group_name, flatten_field(field), move_ind, move_num, is_black)
         return expert_move, 0, 0
 
-    def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=800):
+    def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=800, auto_replay=True):
         go = Go()
 
         vs_string = get_vs_str(is_black_gnugo, is_white_gnugo)
@@ -230,6 +230,9 @@ class GoApp():
              max_moves=max_moves)
 
         go.close()
+
+        if auto_replay:
+            self.replay_with_random_move(black_group_name, white_group_name, num_moves_backward=10)
 
     def replay_all_experiences(self, is_black_gnugo=True, is_white_gnugo=True, max_moves=8000, num_moves_backward=4, num_replays_per_experience=5):
         for experience_group_name in list(self.brain.mem.flushed_experience_groups):
