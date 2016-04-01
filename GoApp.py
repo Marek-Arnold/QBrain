@@ -59,9 +59,11 @@ def black_stones_lost(previous_field, field):
     return res
 
 
-def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_group_name, max_moves, maybe_pause_enabled=False):
+def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_group_name, max_moves, board_size, maybe_pause_enabled=False):
     last_field_of_stones = go.get_field()
-    stones_placed_at_move_field = go.get_field()
+    stones_placed_at_move_field = [None] * board_size
+    for i in range(board_size):
+        stones_placed_at_move_field[i] = [0] * board_size
 
     move_num_black = 0
     move_num_white = 0
@@ -94,12 +96,12 @@ def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_grou
         last_field_of_stones = now_field
 
         for i in range(len(white_lost)):
-            placed_stone_at = stones_placed_at_move_field[white_lost[i][1]][white_lost[i][0]]
+            placed_stone_at = stones_placed_at_move_field[white_lost[i][0]][white_lost[i][1]]
             brain.post_reward(white_group_name, -10.0, placed_stone_at, move_num_white - placed_stone_at)
             brain.post_reward(black_group_name, 1.0, placed_stone_at, move_num_black - placed_stone_at)
 
         for i in range(len(black_lost)):
-            placed_stone_at = stones_placed_at_move_field[black_lost[i][1]][black_lost[i][0]]
+            placed_stone_at = stones_placed_at_move_field[black_lost[i][0]][black_lost[i][1]]
             brain.post_reward(black_group_name, -10.0, placed_stone_at, move_num_black - placed_stone_at)
             brain.post_reward(white_group_name, 1.0, placed_stone_at, move_num_white - placed_stone_at)
 
@@ -229,7 +231,7 @@ class GoApp():
         play(brain=self.brain, go=go,
              black_move_fun=black_move_fun, white_move_fun=white_move_fun,
              black_group_name=black_group_name, white_group_name=white_group_name,
-             max_moves=max_moves, maybe_pause_enabled=maybe_pause_enabled)
+             board_size=self.board_size, max_moves=max_moves, maybe_pause_enabled=maybe_pause_enabled)
 
         go.close()
 
@@ -282,7 +284,7 @@ class GoApp():
                                       move_fun=move_fun,
                                       board_size=self.board_size, pass_move_ind=self.pass_move_ind)
             go = Go(self.board_size)
-            play(brain=self.brain, go=go, max_moves=max_moves,
+            play(brain=self.brain, go=go, max_moves=max_moves, board_size=self.board_size,
                  black_move_fun=black_replayer.play_move, black_group_name=black_group_name_replay,
                  white_move_fun=white_replayer.play_move, white_group_name=white_group_name_replay)
             
