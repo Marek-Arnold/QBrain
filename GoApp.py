@@ -59,7 +59,7 @@ def black_stones_lost(previous_field, field):
     return res
 
 
-def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_group_name, max_moves, maybe_pause_enabled):
+def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_group_name, max_moves, maybe_pause_enabled=False):
     last_field_of_stones = go.get_field()
     stones_placed_at_move_field = go.get_field()
 
