@@ -25,23 +25,22 @@ class Go():
     pass_str = 'pass'
     resign_str = 'resign'
 
-    board_size = 19
-
-    empty_field = 0
-    black_field = 1
-    white_field = -1
+    empty_field = [1, 0, 0]
+    black_field = [0, 0, 1]
+    white_field = [0, 1, 0]
 
     empty_field_char = ' '
     black_field_char = '.'
     white_field_char = 'O'
 
-    def __init__(self):
-        self.go = GoTextPipe(board_size=Go.board_size)
+    def __init__(self, board_size=19):
+        self.go = GoTextPipe(board_size=board_size)
         self.next = Go.black_str
         self.last_has_passed = False
         self.is_finished = False
         self.winner = None
         self.score = None
+        self.board_size = board_size
 
     def switch_next(self):
         if self.next == Go.black_str:
@@ -122,31 +121,33 @@ class Go():
         return stones
 
     def get_field(self):
-        field = [None] * Go.board_size
-        for i in range(Go.board_size):
-            field[i] = [Go.empty_field] * Go.board_size
+        field = [None] * self.board_size
+        for x in range(self.board_size):
+            field[x] = [None] * self.board_size
+            for y in range(self.board_size):
+                field[x][y] = Go.empty_field
 
         for stone in self.get_black_stones():
             x = Go.alpha_values[stone[0].upper()]
             y = int(stone[1:]) - 1
-            field[y][x] = Go.black_field
+            field[x][y] = Go.black_field
 
         for stone in self.get_white_stones():
             x = Go.alpha_values[stone[0].upper()]
             y = int(stone[1:]) - 1
-            field[y][x] = Go.white_field
+            field[x][y] = Go.white_field
 
         return field
 
     def get_field_as_str(self):
         field_str = ''
         field = self.get_field()
-        for y in range(len(field)):
-            row = field[y]
-            for x in range(len(row)):
-                if row[x] == Go.empty_field:
+        for x in range(len(field)):
+            row = field[x]
+            for y in range(len(row)):
+                if row[y] == Go.empty_field:
                     char = Go.empty_field_char
-                elif row[x] == Go.black_field:
+                elif row[y] == Go.black_field:
                     char = Go.black_field_char
                 else:
                     char = Go.white_field_char
@@ -181,7 +182,7 @@ class Go():
 
         for i in range(len(points)):
             p = points[i]
-            field[p[1]][p[0]] = 1.0
+            field[p[0]][p[1]] = 1.0
         return field
 
     def legal_white_moves(self):

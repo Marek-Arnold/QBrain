@@ -39,7 +39,7 @@ class QBrainGoNet:
         self.trainers = {}
 
         self.sess = tf.InteractiveSession()
-        self.x = tf.placeholder(tf.float32, shape=[None, self.field_size], name='x')
+        self.x = tf.placeholder(tf.float32, shape=[None, self.field_size, 3], name='x')
         self.y = tf.placeholder(tf.float32, shape=[None, self.field_size + 1], name='y')
         self.possible_moves = tf.placeholder(tf.float32, shape=[None, self.field_size + 1], name='possible_moves')
 

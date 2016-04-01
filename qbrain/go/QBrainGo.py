@@ -1,5 +1,6 @@
 import os
 
+from qbrain.go.Go import Go
 from qbrain.go.QBrainGoNet import QBrainGoNet
 from qbrain.go.QBrainGoMemory import QBrainGoMemory
 
@@ -72,8 +73,13 @@ class QBrainGo:
         running_experience = input_features
 
         if not is_black:
-            inverted_exp = [i * -1.0 for i in running_experience]
-            running_experience = inverted_exp
+            for x in range(len(running_experience)):
+                for y in range(len(running_experience[x])):
+                    r = running_experience[x][y]
+                    if r == Go.black_field:
+                        running_experience[x][y] = Go.white_field
+                    elif r == Go.white_field:
+                        running_experience[x][y] = Go.black_field
 
         # print memExp
         print('\tpredict')

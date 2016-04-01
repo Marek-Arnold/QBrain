@@ -43,18 +43,18 @@ def maybe_pause(num_seconds=5, message='Continue in 5 seconds, press enter to pa
 
 def white_stones_lost(previous_field, field):
     res = []
-    for y in range(len(previous_field)):
-        for x in range(len(previous_field[y])):
-            if previous_field[y][x] == Go.white_field and field[y][x] != Go.white_field:
+    for x in range(len(previous_field)):
+        for y in range(len(previous_field[x])):
+            if previous_field[x][y] == Go.white_field and field[x][y] != Go.white_field:
                 res.append((x, y))
     return res
 
 
 def black_stones_lost(previous_field, field):
     res = []
-    for y in range(len(previous_field)):
-        for x in range(len(previous_field[y])):
-            if previous_field[y][x] == Go.black_field and field[y][x] != Go.black_field:
+    for x in range(len(previous_field)):
+        for y in range(len(previous_field[x])):
+            if previous_field[x][y] == Go.black_field and field[x][y] != Go.black_field:
                 res.append((x, y))
     return res
 
@@ -74,7 +74,7 @@ def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_grou
             move, predicted_lower_bound, predicted_upper_bound = black_move_fun(go, black_group_name, field, move_num_black, True)
 
             if move[0] is not None:
-                stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_black
+                stones_placed_at_move_field[move[0][0]][move[0][1]] = move_num_black
             else:
                 brain.post_reward(black_group_name, -0.1, move_num_black, 1)
 
@@ -83,7 +83,7 @@ def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_grou
             move, predicted_lower_bound, predicted_upper_bound = white_move_fun(go, white_group_name, field, move_num_white, False)
 
             if move[0] is not None:
-                stones_placed_at_move_field[move[0][1]][move[0][0]] = move_num_white
+                stones_placed_at_move_field[move[0][0]][move[0][1]] = move_num_white
             else:
                 brain.post_reward(white_group_name, -0.1, move_num_white, 1)
             move_num_white += 1
@@ -131,8 +131,8 @@ def move_ind_to_move(move_ind, board_size, pass_move_ind):
     if move_ind == pass_move_ind:
         move = (None, Go.pass_str)
     else:
-        x = int(move_ind % board_size)
-        y = int(move_ind / board_size)
+        x = int(move_ind / board_size)
+        y = int(move_ind % board_size)
         move = ((x, y), None)
     return move
 
@@ -141,7 +141,7 @@ def move_to_move_ind(move, board_size, pass_move_ind):
     if move[0] is None:
         move_ind = pass_move_ind
     else:
-        move_ind = move[0][0] + move[0][1] * board_size
+        move_ind = move[0][0] * board_size + move[0][1]
     return int(move_ind)
 
 
@@ -164,11 +164,10 @@ def get_vs_str(is_black_gnugo, is_white_gnugo):
 class GoApp():
     replay_experience_prefix = '__replay__'
 
-
-    def __init__(self, board_size=19):
+    def __init__(self, board_size=9):
         self.board_size = board_size
         self.pass_move_ind = board_size * board_size
-        self.brain = QBrainGo(board_size, [(3, 16), (5, 32), (9, 64)], [4096, 2048, 1024, 1024, 1024],
+        self.brain = QBrainGo(board_size, [(3, 8)], [2048, 1024, 1024],
                               'saves_mem/', 'go_autosave', '.pkl',
                               'saves_net/', 'go_autosave', '.ckpt')
         self.brain.load()
