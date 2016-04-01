@@ -208,7 +208,7 @@ class GoApp():
         return expert_move, 0, 0
 
     def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=800, auto_replay=True, maybe_pause_enabled=False):
-        go = Go()
+        go = Go(self.board_size)
 
         vs_string = get_vs_str(is_black_gnugo, is_white_gnugo)
 
@@ -281,7 +281,7 @@ class GoApp():
                                       experience_group=white_group, last_replay_move_num=last_replay_move,
                                       move_fun=move_fun,
                                       board_size=self.board_size, pass_move_ind=self.pass_move_ind)
-            go = Go()
+            go = Go(self.board_size)
             play(brain=self.brain, go=go, max_moves=max_moves,
                  black_move_fun=black_replayer.play_move, black_group_name=black_group_name_replay,
                  white_move_fun=white_replayer.play_move, white_group_name=white_group_name_replay)
