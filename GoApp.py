@@ -78,7 +78,7 @@ def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_grou
             if move[0] is not None:
                 stones_placed_at_move_field[move[0][0]][move[0][1]] = move_num_black
             else:
-                brain.post_reward(black_group_name, -0.1, move_num_black, 1)
+                brain.post_reward(black_group_name, -3, move_num_black, 1)
 
             move_num_black += 1
         else:
@@ -87,7 +87,7 @@ def play(brain, go, black_move_fun, white_move_fun, black_group_name, white_grou
             if move[0] is not None:
                 stones_placed_at_move_field[move[0][0]][move[0][1]] = move_num_white
             else:
-                brain.post_reward(white_group_name, -0.1, move_num_white, 1)
+                brain.post_reward(white_group_name, -3, move_num_white, 1)
             move_num_white += 1
 
         # now_field = go.get_field()
