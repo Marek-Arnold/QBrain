@@ -39,7 +39,7 @@ class QBrainGoNet:
         self.trainers = {}
 
         self.sess = tf.InteractiveSession()
-        self.x = tf.placeholder(tf.float32, shape=[None, self.field_size, 3], name='x')
+        self.x = tf.placeholder(tf.float32, shape=[None, self.board_size, self.board_size, 3], name='x')
         self.y = tf.placeholder(tf.float32, shape=[None, self.field_size + 1], name='y')
         self.possible_moves = tf.placeholder(tf.float32, shape=[None, self.field_size + 1], name='possible_moves')
 
@@ -57,8 +57,6 @@ class QBrainGoNet:
             initial = tf.constant(0.1, shape=shape)
             return tf.Variable(initial, name="bias_" + name)
 
-        reshaped_x = tf.reshape(self.x, [-1, self.board_size, self.board_size, 3])
-
         W_conv = [None] * len(convolution_layers)
         b_conv = [None] * len(convolution_layers)
         h_conv = [None] * len(convolution_layers)
@@ -68,7 +66,7 @@ class QBrainGoNet:
 
             if conv_layer_num == 0:
                 input_channels = 3
-                input_data = reshaped_x
+                input_data = self.x
             else:
                 input_channels = convolution_layers[conv_layer_num - 1][1]
                 input_data = h_conv[conv_layer_num - 1]
