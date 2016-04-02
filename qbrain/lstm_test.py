@@ -14,7 +14,7 @@ class NumberCounter:
     def __init__(self, seq_width=2):
         self.lstm_size = 2
         self.seq_width = seq_width
-        self.num_steps = 8
+        self.num_steps = 80
 
         initializer = tf.random_uniform_initializer(-1, 1)
 
@@ -63,7 +63,7 @@ class NumberCounter:
         feed_dict = {self.seq_input: series_input}
         return self.session.run(self.outputs, feed_dict=feed_dict)
 
-    def auto_train(self, num_iter=10, batch_length=8):
+    def auto_train(self, num_iter=10, batch_length=80):
         total_loss = 0
         for iter_num in range(num_iter):
             batch = [NumberCounter.EMPTY_NUM]
