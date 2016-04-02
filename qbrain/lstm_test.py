@@ -32,7 +32,7 @@ class NumberCounter:
 
         self.state = self.initial_state
         self.outputs, self.state = tf.nn.rnn(self.cell, self.seq_input, initial_state=self.state,
-                                             sequence_length=[1])
+                                             sequence_length=[[1]])
 
         self.loss = tf.mul(tf.reduce_sum(tf.pow(self.outputs - self.expected_output, 2)), self.expected_output_valid)
 
