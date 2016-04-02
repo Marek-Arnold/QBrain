@@ -17,7 +17,7 @@ class NumberCounter:
         initializer = tf.random_uniform_initializer(-1, 1)
 
         # what timesteps we want to stop at, notice it's different for each batch hence dimension of [batch]
-        self.early_stop = tf.ones([1], tf.int32)
+        self.early_stop = tf.ones([1, 1], tf.int32)
 
         self.seq_input = tf.placeholder(tf.int32, [self.seq_width])
         self.expected_output = tf.placeholder(tf.int32, [self.seq_width])
