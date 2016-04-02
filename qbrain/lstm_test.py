@@ -16,8 +16,8 @@ class NumberCounter:
         self.seq_width = seq_width
         initializer = tf.random_uniform_initializer(-1, 1)
 
-        self.seq_input = tf.placeholder(tf.int32, [1, self.seq_width])
-        self.expected_output = tf.placeholder(tf.int32, [1, self.seq_width])
+        self.seq_input = tf.placeholder(tf.int32, [self.seq_width])
+        self.expected_output = tf.placeholder(tf.int32, [self.seq_width])
         self.expected_output_valid = tf.placeholder(tf.int32, [1])
 
         self.cell = tf.nn.rnn_cell.LSTMCell(self.lstm_size, self.seq_width, initializer=initializer)
@@ -28,7 +28,7 @@ class NumberCounter:
         # the state is the final state at termination (stopped at step 4 and 6)
 
         self.state = self.initial_state
-        self.outputs, self.state = tf.nn.rnn(self.cell, self.seq_input, initial_state=self.state)
+        self.outputs, self.state = tf.nn.rnn(self.cell, [self.seq_input], initial_state=self.state)
 
         self.loss = tf.mul(tf.reduce_sum(tf.pow(self.outputs - self.expected_output, 2)), self.expected_output_valid)
 
@@ -42,8 +42,8 @@ class NumberCounter:
     def train(self, batch_series_input, batch_series_expected_output, batch_series_output_valid):
         total_loss = 0
         for batch_num in range(len(batch_series_input)):
-            feed_dict = {self.seq_input: [batch_series_input[batch_num]],
-                         self.expected_output: [batch_series_expected_output[batch_num]],
+            feed_dict = {self.seq_input: batch_series_input[batch_num],
+                         self.expected_output: batch_series_expected_output[batch_num],
                          self.expected_output_valid: batch_series_output_valid[batch_num]}
 
             self.trainer.run(session=self.session, feed_dict=feed_dict)
