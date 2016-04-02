@@ -14,11 +14,13 @@ class NumberCounter:
     def __init__(self, seq_width=2):
         self.lstm_size = 2
         self.seq_width = seq_width
+        self.num_steps = 80
+
         initializer = tf.random_uniform_initializer(-1, 1)
 
-        self.seq_input = tf.placeholder(tf.float32, [1, self.seq_width])
-        self.expected_output = tf.placeholder(tf.float32, [1, self.seq_width])
-        self.expected_output_valid = tf.placeholder(tf.float32, [1])
+        self.seq_input = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
+        self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
+        self.expected_output_valid = tf.placeholder(tf.float32, [self.num_steps])
 
         self.cell = tf.nn.rnn_cell.LSTMCell(self.lstm_size, self.seq_width, initializer=initializer)
         self.initial_state = self.cell.zero_state(1, tf.float32)
@@ -30,7 +32,7 @@ class NumberCounter:
         self.state = self.initial_state
         self.outputs, self.state = tf.nn.rnn(self.cell, [self.seq_input], initial_state=self.state)
 
-        self.loss = tf.mul(tf.reduce_sum(tf.pow(tf.sub(self.outputs[0], self.expected_output), 2)), self.expected_output_valid)
+        self.loss = tf.reduce_sum(tf.mul(tf.reduce_sum(tf.pow(tf.sub(self.outputs[0], self.expected_output), 2)), self.expected_output_valid))
 
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
         # usual crap
@@ -40,16 +42,21 @@ class NumberCounter:
 
     # batch_series_input: n_steps, batch_size, seq_width
     def train(self, batch_series_input, batch_series_expected_output, batch_series_output_valid):
-        total_loss = 0
-        for batch_num in range(len(batch_series_input)):
-            feed_dict = {self.seq_input: [batch_series_input[batch_num]],
-                         self.expected_output: [batch_series_expected_output[batch_num]],
-                         self.expected_output_valid: [batch_series_output_valid[batch_num]]}
+        # total_loss = 0
+        # for batch_num in range(len(batch_series_input)):
+        #     feed_dict = {self.seq_input: [batch_series_input[batch_num]],
+        #                  self.expected_output: [batch_series_expected_output[batch_num]],
+        #                  self.expected_output_valid: [batch_series_output_valid[batch_num]]}
+        #
+        #     self.trainer.run(session=self.session, feed_dict=feed_dict)
+        #     total_loss += self.session.run(self.loss, feed_dict=feed_dict)
+        #
+        # return total_loss
+        feed_dict = {self.seq_input: batch_series_input,
+                     self.expected_output: batch_series_expected_output,
+                     self.expected_output_valid: batch_series_output_valid}
 
-            self.trainer.run(session=self.session, feed_dict=feed_dict)
-            total_loss += self.session.run(self.loss, feed_dict=feed_dict)
-
-        return total_loss
+        return self.trainer.run(session=self.session, feed_dict=feed_dict)
 
     def predict(self, series_input):
         feed_dict = {self.seq_input: series_input}
