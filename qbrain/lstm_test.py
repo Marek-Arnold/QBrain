@@ -22,7 +22,7 @@ class NumberCounter:
         self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
         self.expected_output_valid = tf.placeholder(tf.float32, [self.num_steps])
 
-        self.cell = tf.nn.rnn_cell.BasicLSTMCell(self.seq_width, initializer=initializer, forget_bias=2.0)
+        self.cell = tf.nn.rnn_cell.BasicLSTMCell(self.seq_width, forget_bias=2.0)
         self.initial_state = self.cell.zero_state(1, tf.float32)
 
         # ========= This is the most important part ==========
