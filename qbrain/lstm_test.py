@@ -42,8 +42,8 @@ class NumberCounter:
     def train(self, batch_series_input, batch_series_expected_output, batch_series_output_valid):
         total_loss = 0
         for batch_num in range(len(batch_series_input)):
-            feed_dict = {self.seq_input: batch_series_input[batch_num],
-                         self.expected_output: batch_series_expected_output[batch_num],
+            feed_dict = {self.seq_input: [batch_series_input[batch_num]],
+                         self.expected_output: [batch_series_expected_output[batch_num]],
                          self.expected_output_valid: batch_series_output_valid[batch_num]}
 
             self.trainer.run(session=self.session, feed_dict=feed_dict)
