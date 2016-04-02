@@ -38,7 +38,7 @@ class NumberCounter:
 
         # self.loss = tf.reduce_sum(tf.mul(tf.sub(logits, self.expected_output), tf.reshape(tf.concat(0, [self.expected_output_valid, self.expected_output_valid]), [-1, 2])))
 
-        self.loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, self.expected_output)
+        self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, self.expected_output)
 
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
         # usual crap
