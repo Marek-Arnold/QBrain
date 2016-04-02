@@ -57,7 +57,8 @@ class NumberCounter:
                      self.expected_output: batch_series_expected_output,
                      self.expected_output_valid: batch_series_output_valid}
 
-        return self.trainer.run(session=self.session, feed_dict=feed_dict)
+        self.trainer.run(session=self.session, feed_dict=feed_dict)
+        return self.session.run(self.loss, feed_dict=feed_dict)
 
     def predict(self, series_input):
         feed_dict = {self.seq_input: series_input}
