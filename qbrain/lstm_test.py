@@ -29,9 +29,8 @@ class NumberCounter:
         # output will be of length 4 and 6
         # the state is the final state at termination (stopped at step 4 and 6)
 
-        self.state = self.initial_state
         inp = [tf.reshape(i, (1, self.seq_width)) for i in tf.split(0, self.num_steps, self.seq_input)]
-        self.outputs, self.state = tf.nn.rnn(self.cell, inp, initial_state=self.state)
+        self.outputs, self.state = tf.nn.rnn(self.cell, inp, initial_state=self.initial_state)
 
         self.loss = tf.reduce_sum(tf.mul(tf.reduce_sum(tf.pow(tf.sub(self.outputs[0], self.expected_output), 2)), self.expected_output_valid))
 
