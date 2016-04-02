@@ -68,18 +68,15 @@ class NumberCounter:
             for bt in range(1, batch_length):
                 rnd = random.choice(NumberCounter.NUMS)
                 if rnd == NumberCounter.EMPTY_NUM:
-                    expected_out[bt - 1] = [num_one, num_two]
-                    expected_out_valid[bt - 1] = 1
-                    expected_out_valid[bt] = 1
                     num_one = 0
                     num_two = 0
                 elif rnd == NumberCounter.ONE_NUM:
                     num_one += 1
                 else:
                     num_two += 1
+                expected_out[bt] = [num_one, num_two]
+                expected_out_valid[bt] = 1
                 batch.append(rnd)
-            expected_out[-1] = [num_one, num_two]
-            expected_out_valid[-1] = 1
 
             loss = self.train(batch, expected_out, expected_out_valid)
             total_loss += loss
