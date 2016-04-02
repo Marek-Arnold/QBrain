@@ -6,9 +6,9 @@ import random
 
 
 class NumberCounter:
-    EMPTY_NUM = [0, 0]
-    ONE_NUM = [1, 0]
-    TWO_NUM = [0, 1]
+    EMPTY_NUM = [0.0, 0.0]
+    ONE_NUM = [1.0, 0.0]
+    TWO_NUM = [0.0, 1.0]
     NUMS = [EMPTY_NUM, ONE_NUM, TWO_NUM]
 
     def __init__(self, seq_width=2):
