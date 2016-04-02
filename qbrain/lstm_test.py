@@ -12,7 +12,7 @@ class NumberCounter:
     NUMS = [EMPTY_NUM, ONE_NUM, TWO_NUM]
 
     def __init__(self, seq_width=2):
-        self.lstm_size = 4
+        self.lstm_size = 2
         self.seq_width = seq_width
         initializer = tf.random_uniform_initializer(-1, 1)
 
