@@ -16,8 +16,8 @@ class NumberCounter:
         self.seq_width = seq_width
         initializer = tf.random_uniform_initializer(-1, 1)
 
-        self.seq_input = tf.placeholder(tf.float32, [self.seq_width])
-        self.expected_output = tf.placeholder(tf.float32, [self.seq_width])
+        self.seq_input = tf.placeholder(tf.float32, [1, self.seq_width])
+        self.expected_output = tf.placeholder(tf.float32, [1, self.seq_width])
         self.expected_output_valid = tf.placeholder(tf.float32, [1])
 
         self.cell = tf.nn.rnn_cell.LSTMCell(self.lstm_size, self.seq_width, initializer=initializer)
