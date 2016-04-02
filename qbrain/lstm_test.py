@@ -90,4 +90,8 @@ class NumberCounter:
             loss = self.train(batch, expected_out, expected_out_valid)
             total_loss += loss
             print('avg_loss:\t' + str(total_loss / float(iter_num)) + '\tlast_loss:\t' + str(loss))
+
+            print(batch)
+            print(self.predict(batch))
+            input('Press enter to continue..')
         print('done...')
