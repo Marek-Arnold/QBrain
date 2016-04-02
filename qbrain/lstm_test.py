@@ -22,7 +22,7 @@ class NumberCounter:
         self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
         self.expected_output_valid = tf.placeholder(tf.float32, [self.num_steps])
 
-        self.cell = tf.nn.rnn_cell.BasicLSTMCell(self.seq_width)
+        self.cell = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size)
         self.initial_state = self.cell.zero_state(1, tf.float32)
 
         # ========= This is the most important part ==========
@@ -31,8 +31,14 @@ class NumberCounter:
 
         inp = [tf.reshape(i, (1, self.seq_width)) for i in tf.split(0, self.num_steps, self.seq_input)]
         self.outputs, self.state = tf.nn.rnn(self.cell, inp, initial_state=self.initial_state)
-
-        self.loss = tf.reduce_sum(tf.mul(tf.reduce_sum(tf.pow(tf.sub(self.outputs[0], self.expected_output), 2)), self.expected_output_valid))
+        output = tf.reshape(tf.concat(1, self.outputs), [-1, self.lstm_size])
+        softmax_w = tf.get_variable("softmax_w", [self.lstm_size, 2])
+        softmax_b = tf.get_variable("softmax_b", [2])
+        logits = tf.nn.softmax(tf.matmul(output, softmax_w) + softmax_b)
+        self.loss = tf.reduce_sum(tf.nn.seq2seq.sequence_loss_by_example(
+            [logits],
+            [tf.reshape(self.expected_output, [-1])],
+            [self.expected_output_valid]))
 
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
         # usual crap
@@ -44,8 +50,8 @@ class NumberCounter:
     def train(self, batch_series_input, batch_series_expected_output, batch_series_output_valid):
         # total_loss = 0
         # for batch_num in range(len(batch_series_input)):
-        #     feed_dict = {self.seq_input: [batch_series_input[batch_num]],
-        #                  self.expected_output: [batch_series_expected_output[batch_num]],
+        # feed_dict = {self.seq_input: [batch_series_input[batch_num]],
+        # self.expected_output: [batch_series_expected_output[batch_num]],
         #                  self.expected_output_valid: [batch_series_output_valid[batch_num]]}
         #
         #     self.trainer.run(session=self.session, feed_dict=feed_dict)
@@ -91,6 +97,7 @@ class NumberCounter:
             if echo:
                 pred = self.predict(batch)
                 for i in range(len(batch)):
-                    print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i][0][0]) + ', ' + str(pred[i][0][1]))
+                    print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i][0][0]) + ', ' + str(
+                        pred[i][0][1]))
                 input('Press enter to continue..')
         print('done...')
