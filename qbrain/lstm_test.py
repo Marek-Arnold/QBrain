@@ -34,11 +34,11 @@ class NumberCounter:
         output = tf.reshape(tf.concat(1, self.outputs), [-1, self.lstm_size])
         softmax_w = tf.get_variable("softmax_w", [self.lstm_size, 2])
         softmax_b = tf.get_variable("softmax_b", [2])
-        logits = tf.bias_add(tf.matmul(output, softmax_w), softmax_b)
+        logits = tf.nn.bias_add(tf.matmul(output, softmax_w), softmax_b)
 
         # self.loss = tf.reduce_sum(tf.mul(tf.sub(logits, self.expected_output), tf.reshape(tf.concat(0, [self.expected_output_valid, self.expected_output_valid]), [-1, 2])))
 
-        self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, self.expected_output)
+        self.loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, self.expected_output)
 
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
         # usual crap
