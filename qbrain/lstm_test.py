@@ -81,8 +81,8 @@ class NumberCounter:
                     num_two += 1
 
                 batch.append(rnd)
-                expected_out[bt] = batch[bt]
-                expected_out_valid[bt] = 1
+            expected_out[-1] = batch[-1]
+            expected_out_valid[-1] = 1
 
             loss = self.train(batch, expected_out, expected_out_valid)
             total_loss += loss
