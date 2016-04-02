@@ -19,8 +19,8 @@ class NumberCounter:
         initializer = tf.random_uniform_initializer(-1, 1)
 
         self.seq_input = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
-        self.expected_output = tf.placeholder(tf.int64, [self.num_steps, self.seq_width])
-        self.expected_output_valid = tf.placeholder(tf.int64, [self.num_steps])
+        self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
+        self.expected_output_valid = tf.placeholder(tf.float32, [self.num_steps])
 
         self.cell = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size)
         self.initial_state = self.cell.zero_state(1, tf.float32)
