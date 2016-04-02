@@ -18,7 +18,7 @@ class NumberCounter:
 
         initializer = tf.random_uniform_initializer(-1, 1)
 
-        self.seq_input = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
+        self.seq_input = tf.placeholder(tf.float32, [1, self.num_steps, self.seq_width])
         self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
         self.expected_output_valid = tf.placeholder(tf.float32, [self.num_steps])
 
@@ -52,7 +52,7 @@ class NumberCounter:
         #     total_loss += self.session.run(self.loss, feed_dict=feed_dict)
         #
         # return total_loss
-        feed_dict = {self.seq_input: batch_series_input,
+        feed_dict = {self.seq_input: [batch_series_input],
                      self.expected_output: batch_series_expected_output,
                      self.expected_output_valid: batch_series_output_valid}
 
