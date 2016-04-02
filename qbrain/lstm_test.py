@@ -6,9 +6,9 @@ import random
 
 
 class NumberCounter:
-    EMPTY_NUM = [0.0, 0.0]
-    ONE_NUM = [1.0, 0.0]
-    TWO_NUM = [0.0, 1.0]
+    EMPTY_NUM = [0, 0]
+    ONE_NUM = [1, 0]
+    TWO_NUM = [0, 1]
     NUMS = [EMPTY_NUM, ONE_NUM, TWO_NUM]
 
     def __init__(self, seq_width=2):
@@ -19,8 +19,8 @@ class NumberCounter:
         initializer = tf.random_uniform_initializer(-1, 1)
 
         self.seq_input = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
-        self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
-        self.expected_output_valid = tf.placeholder(tf.float32, [self.num_steps])
+        self.expected_output = tf.placeholder(tf.int32, [self.num_steps, self.seq_width])
+        self.expected_output_valid = tf.placeholder(tf.int32, [self.num_steps])
 
         self.cell = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size)
         self.initial_state = self.cell.zero_state(1, tf.float32)
