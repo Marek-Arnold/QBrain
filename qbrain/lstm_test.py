@@ -37,7 +37,7 @@ class NumberCounter:
         logits = tf.nn.softmax(tf.matmul(output, softmax_w) + softmax_b)
         self.loss = tf.reduce_sum(tf.nn.seq2seq.sequence_loss_by_example(
             [logits],
-            [self.expected_output],
+            [tf.reshape(self.expected_output, [-1, 2])],
             [self.expected_output_valid]))
 
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
@@ -73,7 +73,7 @@ class NumberCounter:
         total_loss = 0
         for iter_num in range(num_iter):
             batch = [NumberCounter.EMPTY_NUM]
-            expected_out = [NumberCounter.ONE_NUM] * batch_length
+            expected_out = [NumberCounter.E] * batch_length
             expected_out_valid = [0] * batch_length
             expected_out_valid[0] = 1
             num_one = 0
