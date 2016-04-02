@@ -30,7 +30,7 @@ class NumberCounter:
         # the state is the final state at termination (stopped at step 4 and 6)
 
         self.state = self.initial_state
-        self.outputs, self.state = tf.nn.rnn(self.cell, [self.seq_input], initial_state=self.state)
+        self.outputs, self.state = tf.nn.rnn(self.cell, self.seq_input, initial_state=self.state)
 
         self.loss = tf.reduce_sum(tf.mul(tf.reduce_sum(tf.pow(tf.sub(self.outputs[0], self.expected_output), 2)), self.expected_output_valid))
 
