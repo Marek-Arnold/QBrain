@@ -16,9 +16,6 @@ class NumberCounter:
         self.seq_width = seq_width
         initializer = tf.random_uniform_initializer(-1, 1)
 
-        # what timesteps we want to stop at, notice it's different for each batch hence dimension of [batch]
-        self.early_stop = tf.ones([1, 1], tf.int32)
-
         self.seq_input = tf.placeholder(tf.int32, [self.seq_width])
         self.expected_output = tf.placeholder(tf.int32, [self.seq_width])
         self.expected_output_valid = tf.placeholder(tf.int32, [1])
@@ -31,8 +28,7 @@ class NumberCounter:
         # the state is the final state at termination (stopped at step 4 and 6)
 
         self.state = self.initial_state
-        self.outputs, self.state = tf.nn.rnn(self.cell, self.seq_input, initial_state=self.state,
-                                             sequence_length=[[1]])
+        self.outputs, self.state = tf.nn.rnn(self.cell, self.seq_input, initial_state=self.state)
 
         self.loss = tf.mul(tf.reduce_sum(tf.pow(self.outputs - self.expected_output, 2)), self.expected_output_valid)
 
