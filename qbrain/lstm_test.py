@@ -73,7 +73,7 @@ class NumberCounter:
         total_loss = 0
         for iter_num in range(num_iter):
             batch = [NumberCounter.EMPTY_NUM]
-            expected_out = [NumberCounter.E] * batch_length
+            expected_out = [NumberCounter.EMPTY_NUM] * batch_length
             expected_out_valid = [0] * batch_length
             expected_out_valid[0] = 1
             num_one = 0
