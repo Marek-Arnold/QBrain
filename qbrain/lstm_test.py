@@ -35,10 +35,7 @@ class NumberCounter:
         softmax_w = tf.get_variable("softmax_w", [self.lstm_size, 2])
         softmax_b = tf.get_variable("softmax_b", [2])
         logits = tf.nn.softmax(tf.matmul(output, softmax_w) + softmax_b)
-        self.loss = tf.reduce_sum(tf.nn.seq2seq.sequence_loss_by_example(
-            [tf.reshape(logits, [-1])],
-            [tf.reshape(self.expected_output, [-1])],
-            [self.expected_output_valid]))
+        self.loss = tf.reduce_sum(tf.matmul(tf.sub(logits, self.expected_output), self.expected_output_valid))
 
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
         # usual crap
