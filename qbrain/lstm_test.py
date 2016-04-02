@@ -30,7 +30,7 @@ class NumberCounter:
         self.state = self.initial_state
         self.outputs, self.state = tf.nn.rnn(self.cell, [self.seq_input], initial_state=self.state)
 
-        self.loss = tf.mul(tf.reduce_sum(tf.pow(tf.sub(self.outputs, [self.expected_output]), 2)), self.expected_output_valid)
+        self.loss = tf.mul(tf.reduce_sum(tf.pow(tf.sub(self.outputs[0], self.expected_output), 2)), self.expected_output_valid)
 
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
         # usual crap
