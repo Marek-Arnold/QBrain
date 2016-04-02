@@ -67,7 +67,7 @@ class NumberCounter:
         total_loss = 0
         for iter_num in range(num_iter):
             batch = [NumberCounter.EMPTY_NUM]
-            expected_out = [[0, 0]] * batch_length
+            expected_out = [NumberCounter.ONE_NUM] * batch_length
             expected_out_valid = [0] * batch_length
             expected_out_valid[0] = 1
             num_one = 0
@@ -80,7 +80,7 @@ class NumberCounter:
                 elif rnd == NumberCounter.TWO_NUM:
                     num_two += 1
 
-                expected_out[bt] = [num_one / batch_length, num_two / batch_length]
+                expected_out[bt] = batch[bt - 1]
                 expected_out_valid[bt] = 1
                 batch.append(rnd)
 
