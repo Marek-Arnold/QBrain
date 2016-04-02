@@ -38,7 +38,10 @@ class NumberCounter:
 
         # self.loss = tf.reduce_sum(tf.mul(tf.sub(logits, self.expected_output), tf.reshape(tf.concat(0, [self.expected_output_valid, self.expected_output_valid]), [-1, 2])))
 
-        self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, self.expected_output)
+        self.loss = tf.reduce_sum(
+            tf.mul(tf.nn.softmax_cross_entropy_with_logits(logits, self.expected_output),
+                   self.expected_output_valid)
+        )
 
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
         # usual crap
@@ -52,7 +55,7 @@ class NumberCounter:
         # for batch_num in range(len(batch_series_input)):
         # feed_dict = {self.seq_input: [batch_series_input[batch_num]],
         # self.expected_output: [batch_series_expected_output[batch_num]],
-        #                  self.expected_output_valid: [batch_series_output_valid[batch_num]]}
+        # self.expected_output_valid: [batch_series_output_valid[batch_num]]}
         #
         #     self.trainer.run(session=self.session, feed_dict=feed_dict)
         #     total_loss += self.session.run(self.loss, feed_dict=feed_dict)
@@ -87,8 +90,8 @@ class NumberCounter:
                     num_two += 1
 
                 batch.append(rnd)
-            expected_out[-1] = batch[-1]
-            expected_out_valid[-1] = 1
+                expected_out[bt] = batch[bt-1]
+                expected_out_valid[bt] = 1
 
             loss = self.train(batch, expected_out, expected_out_valid)
             total_loss += loss
