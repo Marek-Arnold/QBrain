@@ -80,9 +80,9 @@ class NumberCounter:
                 elif rnd == NumberCounter.TWO_NUM:
                     num_two += 1
 
-                expected_out[bt] = batch[bt - 1]
-                expected_out_valid[bt] = 1
                 batch.append(rnd)
+                expected_out[bt] = batch[bt]
+                expected_out_valid[bt] = 1
 
             loss = self.train(batch, expected_out, expected_out_valid)
             total_loss += loss
