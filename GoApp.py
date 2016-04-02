@@ -169,7 +169,7 @@ class GoApp():
     def __init__(self, board_size=9):
         self.board_size = board_size
         self.pass_move_ind = board_size * board_size
-        self.brain = QBrainGo(board_size, [(3, 8)], [2048, 1024, 1024],
+        self.brain = QBrainGo(board_size, [(3, 8), (5, 8)], [2048, 1024, 1024],
                               'saves_mem/', 'go_autosave', '.pkl',
                               'saves_net/', 'go_autosave', '.ckpt')
         self.brain.load()
@@ -209,7 +209,7 @@ class GoApp():
         self.brain.expert_forward(group_name, field, move_ind, move_num, is_black)
         return expert_move, 0, 0
 
-    def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=800, auto_replay=True, maybe_pause_enabled=False):
+    def play(self, is_black_gnugo=False, is_white_gnugo=False, max_moves=800, auto_replay=True, maybe_pause_enabled=False, num_moves_backward=10, num_replays=5):
         go = Go(self.board_size)
 
         vs_string = get_vs_str(is_black_gnugo, is_white_gnugo)
@@ -236,7 +236,7 @@ class GoApp():
         go.close()
 
         if auto_replay:
-            self.replay_with_random_move(black_group_name, white_group_name, num_moves_backward=10)
+            self.replay_with_random_move(black_group_name, white_group_name, num_moves_backward=num_moves_backward, num_replays=num_replays)
 
     def replay_all_experiences(self, is_black_gnugo=True, is_white_gnugo=True, max_moves=8000, num_moves_backward=4, num_replays_per_experience=5):
         for experience_group_name in list(self.brain.mem.flushed_experience_groups):
