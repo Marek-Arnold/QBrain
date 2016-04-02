@@ -63,7 +63,7 @@ class NumberCounter:
         feed_dict = {self.seq_input: series_input}
         return self.session.run(self.outputs, feed_dict=feed_dict)
 
-    def auto_train(self, num_iter=10, batch_length=80):
+    def auto_train(self, num_iter=10, batch_length=80, echo=False):
         total_loss = 0
         for iter_num in range(num_iter):
             batch = [NumberCounter.EMPTY_NUM]
@@ -94,8 +94,9 @@ class NumberCounter:
             total_loss += loss
             print('avg_loss:\t' + str(total_loss / float(iter_num)) + '\tlast_loss:\t' + str(loss))
 
-            pred = self.predict(batch)
-            for i in range(len(batch)):
-                print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i][0][0]) + ', ' + str(pred[i][0][1]))
-            input('Press enter to continue..')
+            if echo:
+                pred = self.predict(batch)
+                for i in range(len(batch)):
+                    print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i][0][0]) + ', ' + str(pred[i][0][1]))
+                input('Press enter to continue..')
         print('done...')
