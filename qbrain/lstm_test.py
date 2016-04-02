@@ -32,7 +32,7 @@ class NumberCounter:
         inp = [tf.reshape(i, (1, self.seq_width)) for i in tf.split(0, self.num_steps, self.seq_input)]
         self.outputs, self.state = tf.nn.rnn(self.cell, inp, initial_state=self.initial_state)
 
-        self.loss = tf.reduce_sum(tf.mul(tf.reduce_sum(tf.pow(tf.sub(self.outputs[0], self.expected_output), 2)), self.expected_output_valid))
+        self.loss = tf.reduce_sum(tf.mul(tf.reduce_sum(tf.pow(tf.sub(tf.nn.softmax(self.outputs[0]), self.expected_output), 2)), self.expected_output_valid))
 
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
         # usual crap
@@ -82,7 +82,11 @@ class NumberCounter:
                     num_one += 1
                 else:
                     num_two += 1
-                expected_out[bt] = [num_one, num_two]
+
+                if num_one > num_two:
+                    expected_out[bt] = NumberCounter.ONE_NUM
+                else:
+                    expected_out[bt] = NumberCounter.TWO_NUM
                 expected_out_valid[bt] = 1
                 batch.append(rnd)
 
