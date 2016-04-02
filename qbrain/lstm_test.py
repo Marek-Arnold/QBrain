@@ -93,6 +93,6 @@ class NumberCounter:
 
             pred = self.predict(batch)
             for i in range(len(batch)):
-                print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i][0]) + ', ' + str(pred[i][1]))
+                print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i][0][0]) + ', ' + str(pred[i][0][1]))
             input('Press enter to continue..')
         print('done...')
