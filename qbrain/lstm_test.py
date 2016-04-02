@@ -36,7 +36,7 @@ class NumberCounter:
         softmax_b = tf.get_variable("softmax_b", [2])
         logits = tf.nn.softmax(tf.matmul(output, softmax_w) + softmax_b)
         self.loss = tf.reduce_sum(tf.nn.seq2seq.sequence_loss_by_example(
-            [logits],
+            [tf.reshape(logits, [-1])],
             [tf.reshape(self.expected_output, [-1, 2])],
             [self.expected_output_valid]))
 
