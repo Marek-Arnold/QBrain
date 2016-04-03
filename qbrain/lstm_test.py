@@ -23,28 +23,28 @@ class NumberCounter:
         lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=1.0)
         stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([lstm] * self.lstm_layers)
 
-        self.seq_input = tf.placeholder(tf.float32, [None, self.num_steps, self.seq_width])
-        self.state_input = tf.placeholder(tf.float32, [None, stacked_lstm.state_size])
-        self.expected_output = tf.placeholder(tf.float32, [None, self.num_steps, self.seq_width])
-
         self.batch_size = tf.placeholder(tf.int32, [1])
-        self.initial_state = stacked_lstm.zero_state(self.batch_size[0], tf.float32)
+        batch_size = self.batch_size[0]
+        self.seq_input = tf.placeholder(tf.float32, [batch_size, self.num_steps, self.seq_width])
+        self.state_input = tf.placeholder(tf.float32, [batch_size, stacked_lstm.state_size])
+        self.expected_output = tf.placeholder(tf.float32, [batch_size, self.num_steps, self.seq_width])
+
+        self.initial_state = stacked_lstm.zero_state(batch_size, tf.float32)
 
         # ========= This is the most important part ==========
         # output will be of length 4 and 6
         # the state is the final state at termination (stopped at step 4 and 6)
 
-        # inp = [tf.reshape(i, (1, self.seq_width)) for i in tf.split(0, self.num_steps, self.seq_input)]
-        outputs, self.final_state = tf.nn.rnn(stacked_lstm, self.seq_input, initial_state=self.state_input)
+        inp = [tf.reshape(i, (batch_size, self.seq_width)) for i in tf.split(1, self.num_steps, self.seq_input)]
+        outputs, self.final_state = tf.nn.rnn(stacked_lstm, inp, initial_state=self.state_input)
         output = tf.reshape(tf.concat(1, outputs), [-1, self.lstm_size])
         softmax_w = tf.get_variable("softmax_w", [self.lstm_size, 2])
         softmax_b = tf.get_variable("softmax_b", [2])
         logits = tf.nn.bias_add(tf.matmul(output, softmax_w), softmax_b)
-
         self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, tf.reshape(self.expected_output, [-1, 2]))
         self.total_loss = tf.reduce_sum(self.loss)
 
-        self.predictions = tf.nn.softmax(logits)
+        self.predictions = tf.reshape(tf.nn.softmax(logits), [batch_size, self.num_steps, 2])
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
         # usual crap
         iop = tf.initialize_all_variables()
@@ -64,7 +64,8 @@ class NumberCounter:
                 mini_batch.append(batch_series_input[batch_num][start:end])
                 mini_batch_expected.append(batch_series_expected_output[batch_num][start:end])
 
-            feed_dict = {self.seq_input: mini_batch,
+            feed_dict = {self.batch_size: [len(batch_series_input)],
+                         self.seq_input: mini_batch,
                          self.expected_output: mini_batch_expected,
                          self.state_input: state}
 
@@ -80,7 +81,8 @@ class NumberCounter:
         for i in range(int(math.ceil(len(series_input) / float(self.num_steps)))):
             start = i * self.num_steps
             end = (i + 1) * self.num_steps
-            feed_dict = {self.seq_input: [series_input[start:end]],
+            feed_dict = {self.batch_size: [1],
+                         self.seq_input: [series_input[start:end]],
                          self.state_input: state}
             rp, state = self.session.run([self.predictions, self.final_state], feed_dict=feed_dict)
             res.extend(rp[0])
