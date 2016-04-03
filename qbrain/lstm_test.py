@@ -85,34 +85,20 @@ class NumberCounter:
                 batch.append(rnd)
                 expected_out[bt] = batch[bt-1]
 
-            pred = self.predict(batch)
             if echo:
+                pred = self.predict(batch)
                 for i in range(len(batch)):
                     print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i]))
                 input('Press enter to continue..')
 
-            num_valid = 0
-            num_invalid = 0
-            num_correct_valid = 0
-            num_correct_invalid = 0
-            for i in range(len(batch)):
-                if expected_out[i] == NumberCounter.VALID_WORD:
-                    num_valid += 1
-                    if pred[i][0] > pred[i][1]:
-                        num_correct_valid += 1
-                else:
-                    num_invalid += 1
-                    if pred[i][1] > pred[i][0]:
-                        num_correct_invalid += 1
-
             loss = self.train(batch, expected_out)
             total_loss += loss
-            print('avg_loss:\t' + str(total_loss / float(iter_num)) + '\tlast_loss:\t' + str(loss) + '\tvalid:\t' + str(num_correct_valid) + '/' + str(num_valid) + '\tinvalid:\t' + str(num_correct_invalid) + '/' + str(num_invalid))
+            print('avg_loss:\t' + str(total_loss / float(iter_num)) + '\tlast_loss:\t' + str(loss))
 
-        print('avg_loss:\t' + str(total_loss / float(num_iter)) + '\tlast_loss:\t' + str(loss))
+        print('avg_loss:\t' + str(total_loss / float(num_iter)))
         print('done...')
 
-    def auto_train2(self, num_iter=10, batch_length=80, echo=False, loss_print_iter=100):
+    def auto_train2(self, num_iter=10, batch_length=400, echo=False, loss_print_iter=100):
         total_loss = 0
         for iter_num in range(num_iter):
             batch = [None] * batch_length
@@ -138,13 +124,26 @@ class NumberCounter:
                     batch[ind] = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
                     ind += 1
 
+            pred = self.predict(batch)
+            num_valid = 0
+            num_invalid = 0
+            num_correct_valid = 0
+            num_correct_invalid = 0
+            for i in range(len(batch)):
+                if expected_out[i] == NumberCounter.VALID_WORD:
+                    num_valid += 1
+                    if pred[i][0] > pred[i][1]:
+                        num_correct_valid += 1
+                else:
+                    num_invalid += 1
+                    if pred[i][1] > pred[i][0]:
+                        num_correct_invalid += 1
+
             loss = self.train(batch, expected_out)
             total_loss += loss
-            if iter_num % loss_print_iter == 0:
-                print('avg_loss:\t' + str(total_loss / float(iter_num))) #  + '\tlast_loss:\t' + str(loss))
+            print('avg_loss:\t' + str(total_loss / float(iter_num)) + '\tlast_loss:\t' + str(loss) + '\tvalid:\t' + str(num_correct_valid) + '/' + str(num_valid) + '\tinvalid:\t' + str(num_correct_invalid) + '/' + str(num_invalid))
 
             if echo:
-                pred = self.predict(batch)
                 for i in range(len(batch)):
                     print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i]))
                 input('Press enter to continue..')
