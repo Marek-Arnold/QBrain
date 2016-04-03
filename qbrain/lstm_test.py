@@ -138,9 +138,9 @@ class NumberCounter:
                             expected_out[ind] = NumberCounter.VALID_WORD
                     else:
                         if random.random() > 0.5:
-                            rnd = 1.0
+                            rnd = 1
                         else:
-                            rnd = -1.0
+                            rnd = -1
 
                         for i in range(num_chars + rnd):
                             batch[ind] = NumberCounter.ONE_NUM
