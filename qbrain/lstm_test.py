@@ -53,7 +53,7 @@ class NumberCounter:
     # batch_series_input: n_steps, batch_size, seq_width
     def train(self, batch_series_input, batch_series_expected_output):
         total_loss = 0
-        state = self.session.run(self.initial_state.eval())
+        state = self.initial_state.eval(session=self.session)
         for i in range(int(math.ceil(len(batch_series_input) / float(self.num_steps)))):
             start = i * self.num_steps
             end = (i + 1) * self.num_steps
@@ -63,11 +63,11 @@ class NumberCounter:
 
             self.trainer.run(session=self.session, feed_dict=feed_dict)
             total_loss += self.session.run(self.total_loss, feed_dict=feed_dict)
-            state = self.session.run(self.final_state.eval())
+            state = self.final_state.eval(session=self.session)
         return total_loss
 
     def predict(self, series_input):
-        state = self.session.run(self.initial_state.eval())
+        state = self.initial_state.eval(session=self.session)
         res = []
         for i in range(int(math.ceil(len(series_input) / float(self.num_steps)))):
             start = i * self.num_steps
@@ -75,7 +75,7 @@ class NumberCounter:
             feed_dict = {self.seq_input: series_input[start:end],
                          self.state_input: state}
             res.extend(self.session.run(self.predictions, feed_dict=feed_dict))
-            state = self.session.run(self.final_state.eval())
+            state = self.final_state.eval(session=self.session)
 
         return res
 
