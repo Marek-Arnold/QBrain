@@ -40,6 +40,7 @@ class NumberCounter:
 
         self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, self.expected_output) + 0.1*tf.nn.l2_loss(logits)
 
+        self.predictions = tf.nn.softmax(logits)
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
         # usual crap
         iop = tf.initialize_all_variables()
@@ -67,7 +68,7 @@ class NumberCounter:
 
     def predict(self, series_input):
         feed_dict = {self.seq_input: series_input}
-        return self.session.run(self.outputs, feed_dict=feed_dict)
+        return self.session.run(self.predictions, feed_dict=feed_dict)
 
     def auto_train(self, num_iter=10, batch_length=80, echo=False):
         total_loss = 0
