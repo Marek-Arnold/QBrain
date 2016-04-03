@@ -119,31 +119,30 @@ class NumberCounter:
 
             ind = 0
             while ind < batch_length:
-                if batch_length - ind < 5:
+                if batch_length - ind <= 5:
                     for i in range(batch_length - ind):
                         batch[ind] = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
                         ind += 1
-                    break
                 else:
                     correct_word = random.random() > 0.5
 
-                num_chars = min(int(max_word_length / 2), random.randint(1, int((batch_length - ind) / 2)))
-                if correct_word:
-                    for i in range(num_chars):
-                        batch[ind] = NumberCounter.ONE_NUM
-                        ind += 1
-                    for i in range(num_chars):
-                        batch[ind] = NumberCounter.TWO_NUM
-                        ind += 1
-                    expected_out[ind] = NumberCounter.VALID_WORD
-                else:
-                    for i in range(num_chars * 2):
-                        batch[ind] = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
-                        ind += 1
+                    num_chars = min(int(max_word_length / 2), random.randint(1, int((batch_length - ind) / 2)))
+                    if correct_word:
+                        for i in range(num_chars):
+                            batch[ind] = NumberCounter.ONE_NUM
+                            ind += 1
+                        for i in range(num_chars):
+                            batch[ind] = NumberCounter.TWO_NUM
+                            ind += 1
+                        expected_out[ind] = NumberCounter.VALID_WORD
+                    else:
+                        for i in range(num_chars * 2):
+                            batch[ind] = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
+                            ind += 1
 
-                if ind < batch_length:
-                    batch[ind] = NumberCounter.STOP_WORD
-                    ind += 1
+                    if ind < batch_length:
+                        batch[ind] = NumberCounter.STOP_WORD
+                        ind += 1
 
             pred = self.predict(batch)
             num_valid = 0
