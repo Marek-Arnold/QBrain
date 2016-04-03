@@ -41,7 +41,7 @@ class NumberCounter:
         softmax_b = tf.get_variable("softmax_b", [2])
         logits = tf.nn.bias_add(tf.matmul(output, softmax_w), softmax_b)
 
-        self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, self.expected_output)
+        self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, tf.reshape(self.expected_output, [-1, 2]))
         self.total_loss = tf.reduce_sum(self.loss)
 
         self.predictions = tf.nn.softmax(logits)
