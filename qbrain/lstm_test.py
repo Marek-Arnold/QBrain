@@ -34,8 +34,8 @@ class NumberCounter:
         # output will be of length 4 and 6
         # the state is the final state at termination (stopped at step 4 and 6)
 
-        inp = [tf.reshape(i, (1, self.seq_width)) for i in tf.split(0, self.num_steps, self.seq_input)]
-        outputs, self.final_state = tf.nn.rnn(stacked_lstm, inp, initial_state=self.state_input)
+        # inp = [tf.reshape(i, (1, self.seq_width)) for i in tf.split(0, self.num_steps, self.seq_input)]
+        outputs, self.final_state = tf.nn.rnn(stacked_lstm, self.seq_input, initial_state=self.state_input)
         output = tf.reshape(tf.concat(1, outputs), [-1, self.lstm_size])
         softmax_w = tf.get_variable("softmax_w", [self.lstm_size, 2])
         softmax_b = tf.get_variable("softmax_b", [2])
