@@ -124,7 +124,7 @@ class NumberCounter:
                 else:
                     correct_word = random.random() > 0.5
 
-                num_chars = min(max_word_length / 2, random.randint(1, int((batch_length - ind) / 2)))
+                num_chars = min(int(max_word_length / 2), random.randint(1, int((batch_length - ind) / 2)))
                 if correct_word:
                     for i in range(num_chars):
                         batch[ind] = NumberCounter.ONE_NUM
