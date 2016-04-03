@@ -134,10 +134,19 @@ class NumberCounter:
                         for i in range(num_chars):
                             batch[ind] = NumberCounter.TWO_NUM
                             ind += 1
-                        expected_out[ind] = NumberCounter.VALID_WORD
+                        if ind < batch_length:
+                            expected_out[ind] = NumberCounter.VALID_WORD
                     else:
-                        for i in range(num_chars * 2):
-                            batch[ind] = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
+                        if random.random() > 0.5:
+                            rnd = 1.0
+                        else:
+                            rnd = -1.0
+
+                        for i in range(num_chars + rnd):
+                            batch[ind] = NumberCounter.ONE_NUM
+                            ind += 1
+                        for i in range(num_chars - rnd):
+                            batch[ind] = NumberCounter.TWO_NUM
                             ind += 1
 
                     if ind < batch_length:
