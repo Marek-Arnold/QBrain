@@ -80,7 +80,7 @@ class NumberCounter:
             num_two = 0
 
             for bt in range(1, batch_length):
-                rnd = random.choice(NumberCounter.NUMS)
+                rnd = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
                 if rnd == NumberCounter.ONE_NUM:
                     num_one += 1
                 elif rnd == NumberCounter.TWO_NUM:
@@ -92,7 +92,7 @@ class NumberCounter:
 
             loss = self.train(batch, expected_out, expected_out_valid)
             total_loss += loss
-            print('avg_loss:\t' + str(total_loss / float(iter_num)) + '\tlast_loss:\t' + str(loss))
+            print('avg_loss:\t' + str(total_loss / float(iter_num))) #  + '\tlast_loss:\t' + str(loss))
 
             if echo:
                 pred = self.predict(batch)
