@@ -15,22 +15,25 @@ class NumberCounter:
 
     def __init__(self, seq_width=2):
         self.lstm_size = 32
+        self.lstm_layers = 4
         self.seq_width = seq_width
         self.num_steps = 400
 
         self.seq_input = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
         self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
 
-        self.cell = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=1.0)
-        self.initial_state = self.cell.zero_state(1, tf.float32)
+        lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=1.0)
+        stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([lstm] * self.lstm_layers)
+
+        self.initial_state = stacked_lstm.zero_state(1, tf.float32)
 
         # ========= This is the most important part ==========
         # output will be of length 4 and 6
         # the state is the final state at termination (stopped at step 4 and 6)
 
         inp = [tf.reshape(i, (1, self.seq_width)) for i in tf.split(0, self.num_steps, self.seq_input)]
-        self.outputs, self.state = tf.nn.rnn(self.cell, inp, initial_state=self.initial_state)
-        output = tf.reshape(tf.concat(1, self.outputs), [-1, self.lstm_size])
+        outputs, self.state = tf.nn.rnn(stacked_lstm, inp, initial_state=self.initial_state)
+        output = tf.reshape(tf.concat(1, outputs), [-1, self.lstm_size])
         softmax_w = tf.get_variable("softmax_w", [self.lstm_size, 2])
         softmax_b = tf.get_variable("softmax_b", [2])
         logits = tf.nn.bias_add(tf.matmul(output, softmax_w), softmax_b)
