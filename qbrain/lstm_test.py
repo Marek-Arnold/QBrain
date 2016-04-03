@@ -119,8 +119,11 @@ class NumberCounter:
 
             ind = 0
             while ind < batch_length:
-                if batch_length - ind < 4:
-                    correct_word = False
+                if batch_length - ind < 5:
+                    for i in range(batch_length - ind):
+                        batch[ind] = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
+                        ind += 1
+                    break
                 else:
                     correct_word = random.random() > 0.5
 
