@@ -98,7 +98,6 @@ class NumberCounter:
             if echo:
                 pred = self.predict(batch)
                 for i in range(len(batch)):
-                    print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i][0][0]) + ', ' + str(
-                        pred[i][0][1]))
+                    print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i]))
                 input('Press enter to continue..')
         print('done...')
