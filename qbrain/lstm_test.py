@@ -97,7 +97,7 @@ class NumberCounter:
         print('avg_loss:\t' + str(total_loss / float(num_iter))) #  + '\tlast_loss:\t' + str(loss))
         print('done...')
 
-    def auto_train2(self, num_iter=10, batch_length=800, echo=False, loss_print_iter=100):
+    def auto_train2(self, num_iter=10, batch_length=80, echo=False, loss_print_iter=100):
         total_loss = 0
         for iter_num in range(num_iter):
             batch = [None] * batch_length
