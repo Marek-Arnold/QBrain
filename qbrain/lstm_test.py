@@ -16,9 +16,7 @@ class NumberCounter:
     def __init__(self, seq_width=2):
         self.lstm_size = 32
         self.seq_width = seq_width
-        self.num_steps = 800
-
-        initializer = tf.random_uniform_initializer(-1, 1)
+        self.num_steps = 80
 
         self.seq_input = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
         self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
@@ -102,7 +100,7 @@ class NumberCounter:
     def auto_train2(self, num_iter=10, batch_length=800, echo=False, loss_print_iter=100):
         total_loss = 0
         for iter_num in range(num_iter):
-            batch = [NumberCounter.EMPTY_NUM]
+            batch = [None] * batch_length
             expected_out = [NumberCounter.INVALID_WORD] * batch_length
 
             ind = 0
