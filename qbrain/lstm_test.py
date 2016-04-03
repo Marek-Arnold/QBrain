@@ -24,7 +24,7 @@ class NumberCounter:
         stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([lstm] * self.lstm_layers)
 
         self.seq_input = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
-        self.state_input = tf.placeholder(tf.float32, [1, lstm.state_size])
+        self.state_input = tf.placeholder(tf.float32, [1, stacked_lstm.state_size])
         self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
 
         self.initial_state = stacked_lstm.zero_state(1, tf.float32)
