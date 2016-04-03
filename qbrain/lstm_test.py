@@ -16,7 +16,7 @@ class NumberCounter:
     def __init__(self, seq_width=2):
         self.lstm_size = 32
         self.seq_width = seq_width
-        self.num_steps = 80
+        self.num_steps = 400
 
         self.seq_input = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
         self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
@@ -36,6 +36,7 @@ class NumberCounter:
         logits = tf.nn.bias_add(tf.matmul(output, softmax_w), softmax_b)
 
         self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, self.expected_output)
+        self.total_loss = tf.reduce_sum(self.loss)
 
         self.predictions = tf.nn.softmax(logits)
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
@@ -60,13 +61,13 @@ class NumberCounter:
                      self.expected_output: batch_series_expected_output}
 
         self.trainer.run(session=self.session, feed_dict=feed_dict)
-        return self.session.run(self.loss, feed_dict=feed_dict)
+        return self.session.run(self.total_loss, feed_dict=feed_dict)
 
     def predict(self, series_input):
         feed_dict = {self.seq_input: series_input}
         return self.session.run(self.predictions, feed_dict=feed_dict)
 
-    def auto_train(self, num_iter=10, batch_length=80, echo=False, loss_print_iter=100):
+    def auto_train(self, num_iter=10, batch_length=400, echo=False, loss_print_iter=100):
         total_loss = 0
         for iter_num in range(num_iter):
             batch = [NumberCounter.EMPTY_NUM]
@@ -84,17 +85,31 @@ class NumberCounter:
                 batch.append(rnd)
                 expected_out[bt] = batch[bt-1]
 
-            loss = self.train(batch, expected_out)
-            total_loss += loss
-            if iter_num % loss_print_iter == 0:
-                print('avg_loss:\t' + str(total_loss / float(iter_num))) #  + '\tlast_loss:\t' + str(loss))
-
+            pred = self.predict(batch)
             if echo:
-                pred = self.predict(batch)
                 for i in range(len(batch)):
                     print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i]))
                 input('Press enter to continue..')
-        print('avg_loss:\t' + str(total_loss / float(num_iter))) #  + '\tlast_loss:\t' + str(loss))
+
+            num_valid = 0
+            num_invalid = 0
+            num_correct_valid = 0
+            num_correct_invalid = 0
+            for i in range(len(batch)):
+                if expected_out[i] == NumberCounter.VALID_WORD:
+                    num_valid += 1
+                    if pred[i][0] > pred[i][1]:
+                        num_correct_valid += 1
+                else:
+                    num_invalid += 1
+                    if pred[i][1] > pred[i][0]:
+                        num_correct_invalid += 1
+
+            loss = self.train(batch, expected_out)
+            total_loss += loss
+            print('avg_loss:\t' + str(total_loss / float(iter_num)) + '\tlast_loss:\t' + str(loss) + '\tvalid:\t' + str(num_correct_valid) + '/' + str(num_valid) + '\tinvalid:\t' + str(num_correct_invalid) + '/' + str(num_invalid))
+
+        print('avg_loss:\t' + str(total_loss / float(num_iter)) + '\tlast_loss:\t' + str(loss))
         print('done...')
 
     def auto_train2(self, num_iter=10, batch_length=80, echo=False, loss_print_iter=100):
