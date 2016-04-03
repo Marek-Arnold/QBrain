@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow.models.rnn import rnn
 from tensorflow.models.rnn.rnn_cell import BasicLSTMCell, LSTMCell
 import random
+import math
 
 
 class NumberCounter:
@@ -17,13 +18,14 @@ class NumberCounter:
         self.lstm_size = 32
         self.lstm_layers = 4
         self.seq_width = seq_width
-        self.num_steps = 400
-
-        self.seq_input = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
-        self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
+        self.num_steps = 40
 
         lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=1.0)
         stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([lstm] * self.lstm_layers)
+
+        self.seq_input = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
+        self.state_input = tf.placeholder(tf.float32, [1, lstm.state_size])
+        self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
 
         self.initial_state = stacked_lstm.zero_state(1, tf.float32)
 
@@ -32,7 +34,7 @@ class NumberCounter:
         # the state is the final state at termination (stopped at step 4 and 6)
 
         inp = [tf.reshape(i, (1, self.seq_width)) for i in tf.split(0, self.num_steps, self.seq_input)]
-        outputs, self.state = tf.nn.rnn(stacked_lstm, inp, initial_state=self.initial_state)
+        outputs, self.final_state = tf.nn.rnn(stacked_lstm, inp, initial_state=self.initial_state)
         output = tf.reshape(tf.concat(1, outputs), [-1, self.lstm_size])
         softmax_w = tf.get_variable("softmax_w", [self.lstm_size, 2])
         softmax_b = tf.get_variable("softmax_b", [2])
@@ -50,25 +52,32 @@ class NumberCounter:
 
     # batch_series_input: n_steps, batch_size, seq_width
     def train(self, batch_series_input, batch_series_expected_output):
-        # total_loss = 0
-        # for batch_num in range(len(batch_series_input)):
-        # feed_dict = {self.seq_input: [batch_series_input[batch_num]],
-        # self.expected_output: [batch_series_expected_output[batch_num]],
-        # self.expected_output_valid: [batch_series_output_valid[batch_num]]}
-        #
-        #     self.trainer.run(session=self.session, feed_dict=feed_dict)
-        #     total_loss += self.session.run(self.loss, feed_dict=feed_dict)
-        #
-        # return total_loss
-        feed_dict = {self.seq_input: batch_series_input,
-                     self.expected_output: batch_series_expected_output}
+        total_loss = 0
+        state = self.session.run(self.initial_state.eval())
+        for i in range(int(math.ceil(len(batch_series_input) / float(self.num_steps)))):
+            start = i * self.num_steps
+            end = (i + 1) * self.num_steps
+            feed_dict = {self.seq_input: batch_series_input[start:end],
+                         self.expected_output: batch_series_expected_output[start:end],
+                         self.state_input: state}
 
-        self.trainer.run(session=self.session, feed_dict=feed_dict)
-        return self.session.run(self.total_loss, feed_dict=feed_dict)
+            self.trainer.run(session=self.session, feed_dict=feed_dict)
+            total_loss += self.session.run(self.total_loss, feed_dict=feed_dict)
+            state = self.session.run(self.final_state.eval())
+        return total_loss
 
     def predict(self, series_input):
-        feed_dict = {self.seq_input: series_input}
-        return self.session.run(self.predictions, feed_dict=feed_dict)
+        state = self.session.run(self.initial_state.eval())
+        res = []
+        for i in range(int(math.ceil(len(series_input) / float(self.num_steps)))):
+            start = i * self.num_steps
+            end = (i + 1) * self.num_steps
+            feed_dict = {self.seq_input: series_input[start:end],
+                         self.state_input: state}
+            res.extend(self.session.run(self.predictions, feed_dict=feed_dict))
+            state = self.session.run(self.final_state.eval())
+
+        return res
 
     def auto_train(self, num_iter=10, batch_length=400, echo=False, loss_print_iter=100):
         total_loss = 0
