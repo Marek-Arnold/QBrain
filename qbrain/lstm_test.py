@@ -9,18 +9,19 @@ class NumberCounter:
     EMPTY_NUM = [0, 0]
     ONE_NUM = [1, 0]
     TWO_NUM = [0, 1]
+    VALID_WORD = [1, 0]
+    INVALID_WORD = [0, 1]
     NUMS = [EMPTY_NUM, ONE_NUM, TWO_NUM]
 
     def __init__(self, seq_width=2):
         self.lstm_size = 32
         self.seq_width = seq_width
-        self.num_steps = 80
+        self.num_steps = 800
 
         initializer = tf.random_uniform_initializer(-1, 1)
 
         self.seq_input = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
         self.expected_output = tf.placeholder(tf.float32, [self.num_steps, self.seq_width])
-        self.expected_output_valid = tf.placeholder(tf.float32, [self.num_steps])
 
         self.cell = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=1.0)
         self.initial_state = self.cell.zero_state(1, tf.float32)
@@ -36,8 +37,6 @@ class NumberCounter:
         softmax_b = tf.get_variable("softmax_b", [2])
         logits = tf.nn.bias_add(tf.matmul(output, softmax_w), softmax_b)
 
-        # self.loss = tf.reduce_sum(tf.mul(tf.sub(logits, self.expected_output), tf.reshape(tf.concat(0, [self.expected_output_valid, self.expected_output_valid]), [-1, 2])))
-
         self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, self.expected_output)
 
         self.predictions = tf.nn.softmax(logits)
@@ -48,7 +47,7 @@ class NumberCounter:
         self.session.run(iop)
 
     # batch_series_input: n_steps, batch_size, seq_width
-    def train(self, batch_series_input, batch_series_expected_output, batch_series_output_valid):
+    def train(self, batch_series_input, batch_series_expected_output):
         # total_loss = 0
         # for batch_num in range(len(batch_series_input)):
         # feed_dict = {self.seq_input: [batch_series_input[batch_num]],
@@ -60,8 +59,7 @@ class NumberCounter:
         #
         # return total_loss
         feed_dict = {self.seq_input: batch_series_input,
-                     self.expected_output: batch_series_expected_output,
-                     self.expected_output_valid: batch_series_output_valid}
+                     self.expected_output: batch_series_expected_output}
 
         self.trainer.run(session=self.session, feed_dict=feed_dict)
         return self.session.run(self.loss, feed_dict=feed_dict)
@@ -75,8 +73,6 @@ class NumberCounter:
         for iter_num in range(num_iter):
             batch = [NumberCounter.EMPTY_NUM]
             expected_out = [NumberCounter.EMPTY_NUM] * batch_length
-            expected_out_valid = [0] * batch_length
-            expected_out_valid[0] = 1
             num_one = 0
             num_two = 0
 
@@ -89,9 +85,8 @@ class NumberCounter:
 
                 batch.append(rnd)
                 expected_out[bt] = batch[bt-1]
-                expected_out_valid[bt] = 1
 
-            loss = self.train(batch, expected_out, expected_out_valid)
+            loss = self.train(batch, expected_out)
             total_loss += loss
             if iter_num % loss_print_iter == 0:
                 print('avg_loss:\t' + str(total_loss / float(iter_num))) #  + '\tlast_loss:\t' + str(loss))
@@ -101,5 +96,44 @@ class NumberCounter:
                 for i in range(len(batch)):
                     print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i]))
                 input('Press enter to continue..')
-        print('avg_loss:\t' + str(total_loss / float(iter_num))) #  + '\tlast_loss:\t' + str(loss))
+        print('avg_loss:\t' + str(total_loss / float(num_iter))) #  + '\tlast_loss:\t' + str(loss))
+        print('done...')
+
+    def auto_train2(self, num_iter=10, batch_length=800, echo=False, loss_print_iter=100):
+        total_loss = 0
+        for iter_num in range(num_iter):
+            batch = [NumberCounter.EMPTY_NUM]
+            expected_out = [NumberCounter.INVALID_WORD] * batch_length
+
+            ind = 0
+            while ind < batch_length:
+                if batch_length - ind < 4:
+                    correct_word = False
+                else:
+                    correct_word = random.random() > 0.5
+
+                if correct_word:
+                    num_chars = random.randint(1, (batch_length - ind) / 2)
+                    for i in range(num_chars):
+                        batch[ind] = NumberCounter.ONE_NUM
+                        ind += 1
+                    for i in range(num_chars):
+                        batch[ind] = NumberCounter.TWO_NUM
+                        ind += 1
+                    expected_out[ind - 1] = NumberCounter.VALID_WORD
+                else:
+                    batch[ind] = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
+                    ind += 1
+
+            loss = self.train(batch, expected_out)
+            total_loss += loss
+            if iter_num % loss_print_iter == 0:
+                print('avg_loss:\t' + str(total_loss / float(iter_num))) #  + '\tlast_loss:\t' + str(loss))
+
+            if echo:
+                pred = self.predict(batch)
+                for i in range(len(batch)):
+                    print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i]))
+                input('Press enter to continue..')
+        print('avg_loss:\t' + str(total_loss / float(num_iter))) #  + '\tlast_loss:\t' + str(loss))
         print('done...')
