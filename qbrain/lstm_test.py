@@ -55,7 +55,7 @@ class NumberCounter:
     def train(self, batch_series_input, batch_series_expected_output):
         total_loss = 0
         state = self.initial_state.eval(session=self.session, feed_dict={self.batch_size: [len(batch_series_input)]})
-        for i in range(int(len(batch_series_input) / self.num_steps)):
+        for i in range(int(len(batch_series_input[0]) / self.num_steps)):
             mini_batch = []
             mini_batch_expected = []
             for batch_num in range(len(batch_series_input)):
@@ -89,38 +89,7 @@ class NumberCounter:
 
         return res
 
-    def auto_train(self, num_iter=10, batch_length=400, echo=False, loss_print_iter=100):
-        total_loss = 0
-        for iter_num in range(num_iter):
-            batch = [NumberCounter.EMPTY_NUM]
-            expected_out = [NumberCounter.EMPTY_NUM] * batch_length
-            num_one = 0
-            num_two = 0
-
-            for bt in range(1, batch_length):
-                rnd = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
-                if rnd == NumberCounter.ONE_NUM:
-                    num_one += 1
-                elif rnd == NumberCounter.TWO_NUM:
-                    num_two += 1
-
-                batch.append(rnd)
-                expected_out[bt] = batch[bt-1]
-
-            if echo:
-                pred = self.predict(batch)
-                for i in range(len(batch)):
-                    print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i]))
-                input('Press enter to continue..')
-
-            loss = self.train(batch, expected_out)
-            total_loss += loss
-            print('avg_loss:\t' + str(total_loss / float(iter_num)) + '\tlast_loss:\t' + str(loss))
-
-        print('avg_loss:\t' + str(total_loss / float(num_iter)))
-        print('done...')
-
-    def auto_train2(self, num_iter=10, max_word_length=50, batch_length=400, num_batches=10, echo=False, loss_print_iter=100):
+    def auto_train(self, num_iter=10, max_word_length=50, batch_length=400, num_batches=10, echo=False, loss_print_iter=100):
         total_loss = 0
         for iter_num in range(num_iter):
             batches = [None] * num_batches
