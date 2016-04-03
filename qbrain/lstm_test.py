@@ -80,10 +80,10 @@ class NumberCounter:
         for i in range(int(math.ceil(len(series_input) / float(self.num_steps)))):
             start = i * self.num_steps
             end = (i + 1) * self.num_steps
-            feed_dict = {self.seq_input: series_input[start:end],
+            feed_dict = {self.seq_input: [series_input[start:end]],
                          self.state_input: state}
             rp, state = self.session.run([self.predictions, self.final_state], feed_dict=feed_dict)
-            res.extend(rp)
+            res.extend(rp[0])
 
         return res
 
