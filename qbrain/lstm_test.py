@@ -34,7 +34,7 @@ class NumberCounter:
         # the state is the final state at termination (stopped at step 4 and 6)
 
         inp = [tf.reshape(i, (1, self.seq_width)) for i in tf.split(0, self.num_steps, self.seq_input)]
-        outputs, self.final_state = tf.nn.rnn(stacked_lstm, inp, initial_state=self.initial_state)
+        outputs, self.final_state = tf.nn.rnn(stacked_lstm, inp, initial_state=self.state_input)
         output = tf.reshape(tf.concat(1, outputs), [-1, self.lstm_size])
         softmax_w = tf.get_variable("softmax_w", [self.lstm_size, 2])
         softmax_b = tf.get_variable("softmax_b", [2])
@@ -54,7 +54,7 @@ class NumberCounter:
     def train(self, batch_series_input, batch_series_expected_output):
         total_loss = 0
         state = self.initial_state.eval(session=self.session)
-        for i in range(int(math.ceil(len(batch_series_input) / float(self.num_steps)))):
+        for i in range(int(len(batch_series_input) / self.num_steps)):
             start = i * self.num_steps
             end = (i + 1) * self.num_steps
             feed_dict = {self.seq_input: batch_series_input[start:end],
@@ -62,8 +62,9 @@ class NumberCounter:
                          self.state_input: state}
 
             self.trainer.run(session=self.session, feed_dict=feed_dict)
-            total_loss += self.session.run(self.total_loss, feed_dict=feed_dict)
-            state = self.final_state.eval(session=self.session)
+            loss, state = self.session.run([self.total_loss, self.final_state], feed_dict=feed_dict)
+            total_loss += loss
+            
         return total_loss
 
     def predict(self, series_input):
@@ -74,8 +75,8 @@ class NumberCounter:
             end = (i + 1) * self.num_steps
             feed_dict = {self.seq_input: series_input[start:end],
                          self.state_input: state}
-            res.extend(self.session.run(self.predictions, feed_dict=feed_dict))
-            state = self.final_state.eval(session=self.session)
+            rp, state = self.session.run([self.predictions, self.final_state], feed_dict=feed_dict)
+            res.extend(rp)
 
         return res
 
