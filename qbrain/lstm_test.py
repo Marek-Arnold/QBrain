@@ -25,9 +25,9 @@ class NumberCounter:
 
         self.batch_size = tf.placeholder(tf.int32, [1])
         batch_size = self.batch_size[0]
-        self.seq_input = tf.placeholder(tf.float32, [batch_size, self.num_steps, self.seq_width])
-        self.state_input = tf.placeholder(tf.float32, [batch_size, stacked_lstm.state_size])
-        self.expected_output = tf.placeholder(tf.float32, [batch_size, self.num_steps, self.seq_width])
+        self.seq_input = tf.placeholder(tf.float32, [None, self.num_steps, self.seq_width])
+        self.state_input = tf.placeholder(tf.float32, [None, stacked_lstm.state_size])
+        self.expected_output = tf.placeholder(tf.float32, [None, self.num_steps, self.seq_width])
 
         self.initial_state = stacked_lstm.zero_state(batch_size, tf.float32)
 
