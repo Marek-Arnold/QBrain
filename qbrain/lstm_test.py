@@ -12,7 +12,7 @@ class NumberCounter:
     TWO_NUM = [0, 1]
     VALID_WORD = [1, 0]
     INVALID_WORD = [0, 1]
-    NUMS = [EMPTY_NUM, ONE_NUM, TWO_NUM]
+    STOP_WORD = [1, 1]
 
     def __init__(self, seq_width=2):
         self.lstm_size = 64
@@ -111,7 +111,7 @@ class NumberCounter:
         print('avg_loss:\t' + str(total_loss / float(num_iter)))
         print('done...')
 
-    def auto_train2(self, num_iter=10, batch_length=400, echo=False, loss_print_iter=100):
+    def auto_train2(self, num_iter=10, max_word_length=50, batch_length=400, echo=False, loss_print_iter=100):
         total_loss = 0
         for iter_num in range(num_iter):
             batch = [None] * batch_length
@@ -124,17 +124,22 @@ class NumberCounter:
                 else:
                     correct_word = random.random() > 0.5
 
+                num_chars = min(max_word_length / 2, random.randint(1, int((batch_length - ind) / 2)))
                 if correct_word:
-                    num_chars = min(10, random.randint(1, int((batch_length - ind) / 2)))
                     for i in range(num_chars):
                         batch[ind] = NumberCounter.ONE_NUM
                         ind += 1
                     for i in range(num_chars):
                         batch[ind] = NumberCounter.TWO_NUM
                         ind += 1
-                    expected_out[ind - 1] = NumberCounter.VALID_WORD
+                    expected_out[ind] = NumberCounter.VALID_WORD
                 else:
-                    batch[ind] = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
+                    for i in range(num_chars * 2):
+                        batch[ind] = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
+                        ind += 1
+
+                if ind < batch_length:
+                    batch[ind] = NumberCounter.STOP_WORD
                     ind += 1
 
             pred = self.predict(batch)
