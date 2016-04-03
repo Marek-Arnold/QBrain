@@ -15,10 +15,10 @@ class NumberCounter:
     STOP_WORD = [1, 1]
 
     def __init__(self, seq_width=2):
-        self.lstm_size = 64
-        self.lstm_layers = 2
+        self.lstm_size = 16
+        self.lstm_layers = 20
         self.seq_width = seq_width
-        self.num_steps = 4
+        self.num_steps = 2
 
         lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=1.0)
         stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([lstm] * self.lstm_layers)
