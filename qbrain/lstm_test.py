@@ -18,7 +18,7 @@ class NumberCounter:
         self.lstm_size = 64
         self.lstm_layers = 5
         self.seq_width = seq_width
-        self.num_steps = 4
+        self.num_steps = 10
 
         lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=1.0)
         stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([lstm] * self.lstm_layers)
