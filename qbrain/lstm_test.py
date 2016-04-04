@@ -17,7 +17,7 @@ class NumberCounter:
     INVALID_WORD_END = [0, 0, 1]
 
     def __init__(self, seq_width=2):
-        self.lstm_size = 128
+        self.lstm_size = 16
         self.lstm_layers = 4
         self.seq_width = seq_width
         self.num_steps = 1
@@ -92,6 +92,51 @@ class NumberCounter:
 
         return res
 
+    def gen_batch(self, batch_length, max_word_length):
+        batch = [None] * batch_length
+        expected_out = [NumberCounter.IN_WORD] * batch_length
+
+        ind = 0
+        while ind < batch_length:
+            if batch_length - ind <= 5:
+                for i in range(batch_length - ind):
+                    batch[ind] = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
+                    ind += 1
+            else:
+                correct_word = random.random() > 0.5
+
+                num_chars = min(int(max_word_length / 2), random.randint(1, int((batch_length - ind) / 2)))
+                if correct_word:
+                    for i in range(num_chars):
+                        batch[ind] = NumberCounter.ONE_NUM
+                        ind += 1
+                    for i in range(num_chars):
+                        batch[ind] = NumberCounter.TWO_NUM
+                        ind += 1
+                    if ind < batch_length:
+                        expected_out[ind] = NumberCounter.VALID_WORD_END
+                else:
+                    if random.random() > 0.5:
+                        rnd = 1
+                    else:
+                        rnd = -1
+
+                    for i in range(num_chars + rnd):
+                        batch[ind] = NumberCounter.ONE_NUM
+                        ind += 1
+                    for i in range(num_chars - rnd):
+                        batch[ind] = NumberCounter.TWO_NUM
+                        ind += 1
+
+                    if ind < batch_length:
+                        expected_out[ind] = NumberCounter.INVALID_WORD_END
+
+                if ind < batch_length:
+                    batch[ind] = NumberCounter.STOP_WORD
+                    ind += 1
+
+        return batch, expected_out
+
     def auto_train(self, num_iter=10, max_word_length=50, batch_length=400, num_batches=10, echo=False, loss_print_iter=100):
         total_loss = 0
         for iter_num in range(num_iter):
@@ -104,47 +149,8 @@ class NumberCounter:
             num_correct_invalid = 0
 
             for batch_num in range(num_batches):
-                batch = [None] * batch_length
-                expected_out = [NumberCounter.IN_WORD] * batch_length
+                batch, expected_out = self.gen_batch(batch_length=batch_length, max_word_length=max_word_length)
 
-                ind = 0
-                while ind < batch_length:
-                    if batch_length - ind <= 5:
-                        for i in range(batch_length - ind):
-                            batch[ind] = random.choice([NumberCounter.ONE_NUM, NumberCounter.TWO_NUM])
-                            ind += 1
-                    else:
-                        correct_word = random.random() > 0.5
-
-                        num_chars = min(int(max_word_length / 2), random.randint(1, int((batch_length - ind) / 2)))
-                        if correct_word:
-                            for i in range(num_chars):
-                                batch[ind] = NumberCounter.ONE_NUM
-                                ind += 1
-                            for i in range(num_chars):
-                                batch[ind] = NumberCounter.TWO_NUM
-                                ind += 1
-                            if ind < batch_length:
-                                expected_out[ind] = NumberCounter.VALID_WORD_END
-                        else:
-                            if random.random() > 0.5:
-                                rnd = 1
-                            else:
-                                rnd = -1
-
-                            for i in range(num_chars + rnd):
-                                batch[ind] = NumberCounter.ONE_NUM
-                                ind += 1
-                            for i in range(num_chars - rnd):
-                                batch[ind] = NumberCounter.TWO_NUM
-                                ind += 1
-
-                            if ind < batch_length:
-                                expected_out[ind] = NumberCounter.INVALID_WORD_END
-
-                        if ind < batch_length:
-                            batch[ind] = NumberCounter.STOP_WORD
-                            ind += 1
                 batches[batch_num] = batch
                 expected_outs[batch_num] = expected_out
                 prediction = self.predict(batch)
@@ -165,3 +171,10 @@ class NumberCounter:
 
         print('avg_loss:\t' + str(total_loss / float(num_iter))) #  + '\tlast_loss:\t' + str(loss))
         print('done...')
+
+    def eval(self, max_word_length=50, batch_length=400):
+        batch, expected_out = self.gen_batch(batch_length=batch_length, max_word_length=max_word_length)
+        pred = self.predict(batch)
+
+        for i in range(len(batch)):
+            print(str(batch[i]) + '\t' + str(expected_out[i]) + '\t' + str(pred[i]))
