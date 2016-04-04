@@ -53,7 +53,7 @@ class NumberCounter:
 
         hidden_w = weight_variable([self.lstm_size + self.seq_width, self.hidden_size], "hidden_w")
         hidden_b = bias_variable([self.hidden_size], "hidden_b")
-        hidden_h = tf.nn.relu(tf.nn.bias_add(tf.matmul(hidden_w, tf.concat(1, [output, inp])), hidden_b))
+        hidden_h = tf.nn.relu(tf.nn.bias_add(tf.matmul(hidden_w, tf.concat(1, [output, tf.reshape(self.seq_input, [-1, self.seq_width])])), hidden_b))
 
         softmax_w = weight_variable([self.hidden_size, self.num_out], "softmax_w")
         softmax_b = bias_variable([self.num_out], "softmax_b")
