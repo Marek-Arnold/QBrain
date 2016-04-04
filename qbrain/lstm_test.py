@@ -17,13 +17,13 @@ class NumberCounter:
     INVALID_WORD_END = [0, 0, 1]
 
     def __init__(self, seq_width=2):
-        self.lstm_size = 16
-        self.lstm_layers = 4
+        self.lstm_size = 32
+        self.lstm_layers = 1
         self.seq_width = seq_width
         self.num_steps = 100
         self.num_out = 3
 
-        lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=2.0)
+        lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size)
         stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([lstm] * self.lstm_layers)
 
         self.batch_size = tf.placeholder(tf.int32, [1])
