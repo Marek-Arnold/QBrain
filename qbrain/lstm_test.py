@@ -18,7 +18,7 @@ class NumberCounter:
 
     def __init__(self, seq_width=2):
         self.lstm_size = 32
-        self.hidden_size = 32
+        self.hidden_size = 64
         self.lstm_layers = 1
         self.seq_width = seq_width
         self.num_steps = 100
