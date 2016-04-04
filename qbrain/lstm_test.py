@@ -158,17 +158,24 @@ class NumberCounter:
                 prediction = self.predict(batch)
 
                 for i in range(len(batch)):
+                    pred = NumberCounter.IN_WORD
+
+                    if prediction[i][1] > prediction[i][0] and prediction[i][1] > prediction[i][2]:
+                        pred = NumberCounter.VALID_WORD_END
+                    elif prediction[i][2] > prediction[i][0] and prediction[i][2] > prediction[i][1]:
+                        pred = NumberCounter.INVALID_WORD_END
+
                     if expected_out[i] == NumberCounter.VALID_WORD_END:
                         num_valid += 1
-                        if list(prediction[i]) == NumberCounter.VALID_WORD_END:
+                        if pred == NumberCounter.VALID_WORD_END:
                             num_correct_valid += 1
                     elif expected_out[i] == NumberCounter.INVALID_WORD_END:
                         num_invalid += 1
-                        if list(prediction[i]) == NumberCounter.INVALID_WORD_END:
+                        if pred == NumberCounter.INVALID_WORD_END:
                             num_correct_invalid += 1
                     else:
                         num_inword += 1
-                        if list(prediction[i]) == NumberCounter.IN_WORD:
+                        if pred == NumberCounter.IN_WORD:
                             num_correct_inword += 1
 
             loss = self.train(batches, expected_outs)
