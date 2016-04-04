@@ -47,7 +47,7 @@ class NumberCounter:
         self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, tf.reshape(self.expected_output, [-1, self.num_out]))
         self.total_loss = tf.reduce_sum(self.loss)
 
-        self.predictions = tf.reshape(tf.nn.softmax(logits), [-1, self.num_steps, 2])
+        self.predictions = tf.reshape(tf.nn.softmax(logits), [-1, self.num_steps, self.num_out])
         self.trainer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(self.loss)
         # usual crap
         iop = tf.initialize_all_variables()
