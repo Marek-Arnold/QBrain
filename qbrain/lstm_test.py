@@ -144,9 +144,11 @@ class NumberCounter:
             expected_outs = [None] * num_batches
 
             num_valid = 0
+            num_inword = 0
             num_invalid = 0
             num_correct_valid = 0
             num_correct_invalid = 0
+            num_correct_inword = 0
 
             for batch_num in range(num_batches):
                 batch, expected_out = self.gen_batch(batch_length=batch_length, max_word_length=max_word_length)
@@ -158,16 +160,23 @@ class NumberCounter:
                 for i in range(len(batch)):
                     if expected_out[i] == NumberCounter.VALID_WORD_END:
                         num_valid += 1
-                        if prediction[i][0] > prediction[i][1]:
+                        if prediction[i] == NumberCounter.VALID_WORD_END:
                             num_correct_valid += 1
-                    else:
+                    elif expected_out[i] == NumberCounter.INVALID_WORD_END:
                         num_invalid += 1
-                        if prediction[i][1] > prediction[i][0]:
+                        if prediction[i] == NumberCounter.INVALID_WORD_END:
                             num_correct_invalid += 1
+                    else:
+                        num_inword += 1
+                        if prediction[i] == NumberCounter.IN_WORD:
+                            num_correct_inword += 1
 
             loss = self.train(batches, expected_outs)
             total_loss += loss
-            print('avg_loss:\t' + str(total_loss / float(iter_num + 1)) + '\tlast_loss:\t' + str(loss) + '\tvalid:\t' + str(num_correct_valid) + '/' + str(num_valid) + '\tinvalid:\t' + str(num_correct_invalid) + '/' + str(num_invalid))
+            print('avg_loss:\t' + str(total_loss / float(iter_num + 1)) + '\tlast_loss:\t' + str(loss) +
+                  '\tvalid:\t' + str(num_correct_valid) + '/' + str(num_valid) +
+                  '\tinvalid:\t' + str(num_correct_invalid) + '/' + str(num_invalid) +
+                  '\tinword:\t' + str(num_correct_inword) + '/' + str(num_inword))
 
         print('avg_loss:\t' + str(total_loss / float(num_iter))) #  + '\tlast_loss:\t' + str(loss))
         print('done...')
