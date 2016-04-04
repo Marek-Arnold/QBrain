@@ -156,7 +156,6 @@ class NumberCounter:
                 batches[batch_num] = batch
                 expected_outs[batch_num] = expected_out
                 prediction = self.predict(batch)
-                print(prediction)
 
                 for i in range(len(batch)):
                     if expected_out[i] == NumberCounter.VALID_WORD_END:
