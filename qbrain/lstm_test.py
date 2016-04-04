@@ -15,12 +15,12 @@ class NumberCounter:
     STOP_WORD = [1, 1]
 
     def __init__(self, seq_width=2):
-        self.lstm_size = 1024
-        self.lstm_layers = 1
+        self.lstm_size = 128
+        self.lstm_layers = 4
         self.seq_width = seq_width
         self.num_steps = 10
 
-        lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=1.0)
+        lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=2.0)
         stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([lstm] * self.lstm_layers)
 
         self.batch_size = tf.placeholder(tf.int32, [1])
