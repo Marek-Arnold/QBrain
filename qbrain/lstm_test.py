@@ -20,7 +20,7 @@ class NumberCounter:
         self.lstm_size = 16
         self.lstm_layers = 4
         self.seq_width = seq_width
-        self.num_steps = 1
+        self.num_steps = 100
         self.num_out = 3
 
         lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=2.0)
