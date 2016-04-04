@@ -57,8 +57,8 @@ class NumberCounter:
         hidden_b = bias_variable([self.hidden_size], "hidden_b")
         hidden_h = tf.nn.relu(
             tf.nn.bias_add(
-                tf.matmul(hidden_w, concated_input),
-                hidden_b
+                hidden_b,
+                tf.matmul(hidden_w, concated_input)
             )
         )
 
