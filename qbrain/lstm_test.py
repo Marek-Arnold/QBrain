@@ -18,10 +18,19 @@ class NumberCounter:
 
     def __init__(self, seq_width=2):
         self.lstm_size = 32
+        self.hidden_size = 32
         self.lstm_layers = 1
         self.seq_width = seq_width
         self.num_steps = 100
         self.num_out = 3
+
+        def weight_variable(shape, name):
+            initial = tf.truncated_normal(shape, stddev=0.01)
+            return tf.Variable(initial, name="weights_" + name)
+
+        def bias_variable(shape, name):
+            initial = tf.constant(0.1, shape=shape)
+            return tf.Variable(initial, name="bias_" + name)
 
         lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size)
         stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([lstm] * self.lstm_layers)
@@ -41,9 +50,14 @@ class NumberCounter:
         inp = [tf.squeeze(i, [1]) for i in tf.split(1, self.num_steps, self.seq_input)]
         outputs, self.final_state = tf.nn.rnn(stacked_lstm, inp, initial_state=self.state_input)
         output = tf.reshape(tf.concat(1, outputs), [-1, self.lstm_size])
-        softmax_w = tf.get_variable("softmax_w", [self.lstm_size, self.num_out])
-        softmax_b = tf.get_variable("softmax_b", [self.num_out])
-        logits = tf.nn.bias_add(tf.matmul(output, softmax_w), softmax_b)
+
+        hidden_w = weight_variable([self.lstm_size + self.seq_width, self.hidden_size], "hidden_w")
+        hidden_b = bias_variable([self.hidden_size], "hidden_b")
+        hidden_h = tf.nn.relu(tf.nn.bias_add(tf.matmul(hidden_w, tf.concat(1, [output, inp])), hidden_b))
+
+        softmax_w = weight_variable([self.hidden_size, self.num_out], "softmax_w")
+        softmax_b = bias_variable([self.num_out], "softmax_b")
+        logits = tf.nn.bias_add(tf.matmul(hidden_h, softmax_w), softmax_b)
         self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, tf.reshape(self.expected_output, [-1, self.num_out]))
         self.total_loss = tf.reduce_sum(self.loss)
 
