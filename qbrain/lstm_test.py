@@ -10,15 +10,18 @@ class NumberCounter:
     EMPTY_NUM = [0, 0]
     ONE_NUM = [1, 0]
     TWO_NUM = [0, 1]
-    VALID_WORD = [1, 0]
-    INVALID_WORD = [0, 1]
     STOP_WORD = [1, 1]
+
+    IN_WORD = [1, 0, 0]
+    VALID_WORD_END = [0, 1, 0]
+    INVALID_WORD_END = [0, 0, 1]
 
     def __init__(self, seq_width=2):
         self.lstm_size = 128
         self.lstm_layers = 4
         self.seq_width = seq_width
-        self.num_steps = 10
+        self.num_steps = 1
+        self.num_out = 3
 
         lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size, forget_bias=2.0)
         stacked_lstm = tf.nn.rnn_cell.MultiRNNCell([lstm] * self.lstm_layers)
@@ -38,10 +41,10 @@ class NumberCounter:
         inp = [tf.squeeze(i, [1]) for i in tf.split(1, self.num_steps, self.seq_input)]
         outputs, self.final_state = tf.nn.rnn(stacked_lstm, inp, initial_state=self.state_input)
         output = tf.reshape(tf.concat(1, outputs), [-1, self.lstm_size])
-        softmax_w = tf.get_variable("softmax_w", [self.lstm_size, 2])
-        softmax_b = tf.get_variable("softmax_b", [2])
+        softmax_w = tf.get_variable("softmax_w", [self.lstm_size, self.num_out])
+        softmax_b = tf.get_variable("softmax_b", [self.num_out])
         logits = tf.nn.bias_add(tf.matmul(output, softmax_w), softmax_b)
-        self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, tf.reshape(self.expected_output, [-1, 2]))
+        self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, tf.reshape(self.expected_output, [-1, self.num_out]))
         self.total_loss = tf.reduce_sum(self.loss)
 
         self.predictions = tf.reshape(tf.nn.softmax(logits), [-1, self.num_steps, 2])
@@ -102,7 +105,7 @@ class NumberCounter:
 
             for batch_num in range(num_batches):
                 batch = [None] * batch_length
-                expected_out = [NumberCounter.INVALID_WORD] * batch_length
+                expected_out = [NumberCounter.IN_WORD] * batch_length
 
                 ind = 0
                 while ind < batch_length:
@@ -122,7 +125,7 @@ class NumberCounter:
                                 batch[ind] = NumberCounter.TWO_NUM
                                 ind += 1
                             if ind < batch_length:
-                                expected_out[ind] = NumberCounter.VALID_WORD
+                                expected_out[ind] = NumberCounter.VALID_WORD_END
                         else:
                             if random.random() > 0.5:
                                 rnd = 1
@@ -136,6 +139,9 @@ class NumberCounter:
                                 batch[ind] = NumberCounter.TWO_NUM
                                 ind += 1
 
+                            if ind < batch_length:
+                                expected_out[ind] = NumberCounter.INVALID_WORD_END
+
                         if ind < batch_length:
                             batch[ind] = NumberCounter.STOP_WORD
                             ind += 1
@@ -144,7 +150,7 @@ class NumberCounter:
                 prediction = self.predict(batch)
 
                 for i in range(len(batch)):
-                    if expected_out[i] == NumberCounter.VALID_WORD:
+                    if expected_out[i] == NumberCounter.VALID_WORD_END:
                         num_valid += 1
                         if prediction[i][0] > prediction[i][1]:
                             num_correct_valid += 1
