@@ -51,9 +51,16 @@ class NumberCounter:
         outputs, self.final_state = tf.nn.rnn(stacked_lstm, inp, initial_state=self.state_input)
         output = tf.reshape(tf.concat(1, outputs), [-1, self.lstm_size])
 
+        reshaped_seq_input = tf.reshape(self.seq_input, [-1, self.seq_width])
+        concated_input = tf.concat(1, [output, reshaped_seq_input])
         hidden_w = weight_variable([self.lstm_size + self.seq_width, self.hidden_size], "hidden_w")
         hidden_b = bias_variable([self.hidden_size], "hidden_b")
-        hidden_h = tf.nn.relu(tf.nn.bias_add(tf.matmul(hidden_w, tf.concat(1, [output, tf.reshape(self.seq_input, [-1, self.seq_width])])), hidden_b))
+        hidden_h = tf.nn.relu(
+            tf.nn.bias_add(
+                tf.matmul(hidden_w, concated_input),
+                hidden_b
+            )
+        )
 
         softmax_w = weight_variable([self.hidden_size, self.num_out], "softmax_w")
         softmax_b = bias_variable([self.num_out], "softmax_b")
