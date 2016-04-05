@@ -17,11 +17,11 @@ class NumberCounter:
     INVALID_WORD_END = [0, 0, 1]
 
     def __init__(self, seq_width=2):
-        self.lstm_size = 8
+        self.lstm_size = 64
         self.hidden_size = 16
         self.lstm_layers = 2
         self.seq_width = seq_width
-        self.num_steps = 2
+        self.num_steps = 1
         self.num_out = 3
 
         def weight_variable(shape, name):
