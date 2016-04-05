@@ -17,7 +17,7 @@ class NumberCounter:
     INVALID_WORD_END = [0, 0, 1]
 
     def __init__(self, seq_width=2):
-        self.lstm_size = 64
+        self.lstm_size = 1024
         self.hidden_size = 16
         self.lstm_layers = 2
         self.seq_width = seq_width
