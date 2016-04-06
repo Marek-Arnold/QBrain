@@ -40,7 +40,7 @@ class NumberCounter:
         self.seq_input = tf.placeholder(tf.float32, [None, self.num_steps, self.seq_width])
         self.state_input = tf.placeholder(tf.float32, [None, stacked_lstm.state_size])
         self.expected_output = tf.placeholder(tf.float32, [None, self.num_steps, self.num_out])
-        self.expected_output_weights = tf.placeholder(tf.float32, [None, self.num_steps, 1])
+        self.expected_output_weights = tf.placeholder(tf.float32, [None, self.num_steps])
         self.expected_output_ind = tf.argmax(self.expected_output, 2)
 
         self.initial_state = stacked_lstm.zero_state(batch_size, tf.float32)
