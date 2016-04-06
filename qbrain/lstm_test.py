@@ -69,8 +69,8 @@ class NumberCounter:
         logits = tf.nn.bias_add(tf.matmul(hidden_h, softmax_w), softmax_b)
         # self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, tf.reshape(self.expected_output, [-1, self.num_out]))
         self.loss = tf.nn.seq2seq.sequence_loss_by_example(logits,
-                                                           tf.reshape(self.expected_output_ind, [-1, 1]),
-                                                           tf.reshape(self.expected_output_weights, [-1, 1]))
+                                                           [i for i in tf.reshape(self.expected_output_ind, [-1, 1])],
+                                                           [i for i in tf.reshape(self.expected_output_weights, [-1, 1])])
         self.total_loss = tf.reduce_sum(self.loss)
 
         self.predictions = tf.reshape(tf.nn.softmax(logits), [-1, self.num_steps, self.num_out])
