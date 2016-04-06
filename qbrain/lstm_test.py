@@ -68,7 +68,7 @@ class NumberCounter:
         softmax_b = bias_variable([self.num_out], "softmax_b")
         logits = tf.nn.bias_add(tf.matmul(hidden_h, softmax_w), softmax_b)
         # self.loss = tf.nn.softmax_cross_entropy_with_logits(logits, tf.reshape(self.expected_output, [-1, self.num_out]))
-        self.loss = tf.nn.seq2seq.sequence_loss_by_example([i for i in tf.split(0, 1, tf.reshape(logits, [-1, 1]))],
+        self.loss = tf.nn.seq2seq.sequence_loss_by_example([i for i in tf.split(0, 1, tf.reshape(logits, [-1, self.num_out]))],
                                                            [i for i in tf.split(0, 1, tf.reshape(self.expected_output_ind, [-1, 1]))],
                                                            [i for i in tf.split(0, 1, tf.reshape(self.expected_output_weights, [-1, 1]))])
         self.total_loss = tf.reduce_sum(self.loss)
