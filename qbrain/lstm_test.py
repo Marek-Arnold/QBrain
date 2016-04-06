@@ -215,7 +215,7 @@ class NumberCounter:
                         if pred == NumberCounter.IN_WORD:
                             num_correct_inword += 1
 
-            loss = self.train(batches, expected_outs, expected_out_weights)
+            loss = self.train(batches, expected_outs, expected_out_weightss)
             total_loss += loss
             print('avg_loss:\t' + str(total_loss / float(iter_num + 1)) + '\tlast_loss:\t' + str(loss) +
                   '\tvalid:\t' + str(num_correct_valid) + '/' + str(num_valid) +
