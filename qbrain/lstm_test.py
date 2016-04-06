@@ -87,17 +87,19 @@ class NumberCounter:
         for i in range(int(len(batch_series_input[0]) / self.num_steps)):
             mini_batch = []
             mini_batch_expected = []
+            mini_batch_expected_weights = []
             for batch_num in range(len(batch_series_input)):
                 start = i * self.num_steps
                 end = (i + 1) * self.num_steps
                 mini_batch.append(batch_series_input[batch_num][start:end])
                 mini_batch_expected.append(batch_series_expected_output[batch_num][start:end])
+                mini_batch_expected_weights.append(batch_series_expected_output_weights[batch_num][start:end])
 
             feed_dict = {self.batch_size: [len(batch_series_input)],
                          self.seq_input: mini_batch,
                          self.expected_output: mini_batch_expected,
-                         self.state_input: state,
-                         self.expected_output_weights: batch_series_expected_output_weights
+                         self.expected_output_weights: mini_batch_expected_weights,
+                         self.state_input: state
             }
 
             self.trainer.run(session=self.session, feed_dict=feed_dict)
@@ -168,7 +170,8 @@ class NumberCounter:
 
         return batch, expected_out, expected_out_weights
 
-    def auto_train(self, num_iter=10, max_word_length=50, batch_length=400, num_batches=10, echo=False, loss_print_iter=100):
+    def auto_train(self, num_iter=10, max_word_length=50, batch_length=400, num_batches=10, echo=False,
+                   loss_print_iter=100):
         total_loss = 0
         for iter_num in range(num_iter):
             batches = [None] * num_batches
@@ -183,7 +186,8 @@ class NumberCounter:
             num_correct_inword = 0
 
             for batch_num in range(num_batches):
-                batch, expected_out, expected_out_weights = self.gen_batch(batch_length=batch_length, max_word_length=max_word_length)
+                batch, expected_out, expected_out_weights = self.gen_batch(batch_length=batch_length,
+                                                                           max_word_length=max_word_length)
 
                 batches[batch_num] = batch
                 expected_outs[batch_num] = expected_out
@@ -218,11 +222,12 @@ class NumberCounter:
                   '\tinvalid:\t' + str(num_correct_invalid) + '/' + str(num_invalid) +
                   '\tinword:\t' + str(num_correct_inword) + '/' + str(num_inword))
 
-        print('avg_loss:\t' + str(total_loss / float(num_iter))) #  + '\tlast_loss:\t' + str(loss))
+        print('avg_loss:\t' + str(total_loss / float(num_iter)))  # + '\tlast_loss:\t' + str(loss))
         print('done...')
 
     def eval(self, max_word_length=50, batch_length=400):
-        batch, expected_out, expected_out_weights = self.gen_batch(batch_length=batch_length, max_word_length=max_word_length)
+        batch, expected_out, expected_out_weights = self.gen_batch(batch_length=batch_length,
+                                                                   max_word_length=max_word_length)
         pred = self.predict(batch)
 
         for i in range(len(batch)):
